@@ -219,7 +219,7 @@ const barChartOptions = {
 
         <!-- Stats Cards - Row 1 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-            <Link :href="route('admin.bookings.index')" class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border hover:border-yellow-500 transition-colors group">
+            <Link :href="route('admin.bookings.index')" class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40 hover:border-yellow-500 transition-colors group">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-400">Booking Perlu Konfirmasi</p>
@@ -233,7 +233,7 @@ const barChartOptions = {
                 </div>
             </Link>
 
-            <Link :href="route('admin.reviews.index', { status: 'pending' })" class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border hover:border-cyan-500 transition-colors group">
+            <Link :href="route('admin.reviews.index', { status: 'pending' })" class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40 hover:border-cyan-500 transition-colors group">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-400">Review Perlu Moderasi</p>
@@ -247,7 +247,7 @@ const barChartOptions = {
                 </div>
             </Link>
 
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-400">Total Pendapatan</p>
@@ -261,7 +261,7 @@ const barChartOptions = {
                 </div>
             </div>
 
-            <Link :href="route('admin.users.index')" class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border hover:border-blue-500 transition-colors group">
+            <Link :href="route('admin.users.index')" class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40 hover:border-blue-500 transition-colors group">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-400">Total Pelanggan</p>
@@ -278,7 +278,7 @@ const barChartOptions = {
 
         <!-- Stats Cards - Row 2 -->
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-400">Total Booking</p>
@@ -292,7 +292,7 @@ const barChartOptions = {
                 </div>
             </div>
 
-            <Link :href="route('admin.packages.index')" class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border hover:border-purple-500 transition-colors">
+            <Link :href="route('admin.packages.index')" class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40 hover:border-purple-500 transition-colors">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-400">Paket Aktif</p>
@@ -306,7 +306,7 @@ const barChartOptions = {
                 </div>
             </Link>
 
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-400">Rata-rata Nilai Booking</p>
@@ -320,7 +320,7 @@ const barChartOptions = {
                 </div>
             </div>
 
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
                 <div class="flex justify-between items-start">
                     <div class="space-y-1">
                         <p class="text-sm font-medium text-gray-400">Pertumbuhan Bulan Ini</p>
@@ -343,16 +343,16 @@ const barChartOptions = {
         <!-- Charts Section -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
             <!-- Revenue Trend Chart -->
-            <div class="lg:col-span-2 bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-700 pb-2">Tren Pendapatan (12 Bulan Terakhir)</h2>
+            <div class="lg:col-span-2 bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-600/50 pb-2">Tren Pendapatan (12 Bulan Terakhir)</h2>
                 <div class="h-72">
                     <Line :data="revenueChartData" :options="revenueChartOptions" />
                 </div>
             </div>
 
             <!-- Booking Status Distribution -->
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-700 pb-2">Distribusi Status Booking</h2>
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-600/50 pb-2">Distribusi Status Booking</h2>
                 <div class="h-72">
                     <Doughnut :data="bookingStatusChartData" :options="doughnutOptions" />
                 </div>
@@ -362,8 +362,8 @@ const barChartOptions = {
         <!-- Top Packages & Monthly Summary -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
             <!-- Top Packages Chart -->
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-700 pb-2">Top 5 Paket Berdasarkan Revenue</h2>
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-600/50 pb-2">Top 5 Paket Berdasarkan Revenue</h2>
                 <div v-if="chartData.topPackages.length > 0" class="h-64">
                     <Bar :data="topPackagesChartData" :options="barChartOptions" />
                 </div>
@@ -371,8 +371,8 @@ const barChartOptions = {
             </div>
 
             <!-- Monthly Revenue Summary Table -->
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-700 pb-2">Ringkasan Pendapatan Bulanan</h2>
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-600/50 pb-2">Ringkasan Pendapatan Bulanan</h2>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm">
                         <thead class="bg-gray-700/50 text-xs uppercase text-gray-400">
@@ -396,8 +396,8 @@ const barChartOptions = {
 
         <!-- Recent Bookings & Reviews -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-700 pb-2">Booking Perlu Aksi</h2>
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-600/50 pb-2">Booking Perlu Aksi</h2>
                 <div v-if="recentBookings.length === 0" class="text-gray-500 italic">Tidak ada booking yang perlu aksi.</div>
                 <div v-else class="space-y-4">
                     <div v-for="booking in recentBookings" :key="booking.id" class="flex justify-between items-center">
@@ -412,8 +412,8 @@ const barChartOptions = {
                 </div>
             </div>
 
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-700 pb-2">Review Perlu Moderasi</h2>
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                <h2 class="text-xl font-bold text-brand-cyan mb-4 border-b border-gray-600/50 pb-2">Review Perlu Moderasi</h2>
                 <div v-if="recentReviews.length === 0" class="text-gray-500 italic">Tidak ada review yang perlu dimoderasi.</div>
                 <div v-else class="space-y-4">
                      <div v-for="review in recentReviews" :key="review.id" class="flex justify-between items-center">

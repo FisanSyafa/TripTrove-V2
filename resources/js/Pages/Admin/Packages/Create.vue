@@ -24,6 +24,8 @@ const form = useForm({
     cover_image: null,
     status: 'draft', // Default status
     category: '',
+    pickup_time: '',
+    is_children_friendly: false,
 });
 
 // Fungsi submit
@@ -42,23 +44,23 @@ const submit = () => {
     <AdminLayout>
         <h1 class="text-3xl font-bold mb-6 text-brand-cyan">Tambah Paket Wisata Baru</h1>
 
-        <form @submit.prevent="submit" class="max-w-3xl space-y-6 bg-gray-800 p-8 rounded-lg shadow-lg border border-brand-border">
+        <form @submit.prevent="submit" class="max-w-3xl space-y-6 bg-[#111c2e] p-8 rounded-xl shadow-lg border border-gray-700/40">
 
             <div>
                 <InputLabel for="name" value="Nama Paket" class="!text-brand-cyan !font-semibold" />
-                <TextInput id="name" type="text" class="mt-1 block w-full bg-gray-700 border-gray-600 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.name" required />
+                <TextInput id="name" type="text" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.name" required />
                 <InputError class="mt-2" :message="form.errors.name" />
             </div>
 
             <div>
                 <InputLabel for="destination_summary" value="Ringkasan Destinasi (cth: Yogyakarta & Magelang)" class="!text-brand-cyan !font-semibold" />
-                <TextInput id="destination_summary" type="text" class="mt-1 block w-full bg-gray-700 border-gray-600 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.destination_summary" required />
+                <TextInput id="destination_summary" type="text" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.destination_summary" required />
                 <InputError class="mt-2" :message="form.errors.destination_summary" />
             </div>
 
             <div>
                 <InputLabel for="location_details" value="Detail Lokasi (Opsional)" class="!text-brand-cyan !font-semibold" />
-                <textarea id="location_details" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white" v-model="form.location_details" rows="3"></textarea>
+                <textarea id="location_details" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white" v-model="form.location_details" rows="3"></textarea>
                 <InputError class="mt-2" :message="form.errors.location_details" />
             </div>
 
@@ -76,17 +78,17 @@ const submit = () => {
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
                     <InputLabel for="duration_days" value="Durasi (Hari)" class="!text-brand-cyan !font-semibold" />
-                    <TextInput id="duration_days" type="number" min="1" class="mt-1 block w-full bg-gray-700 border-gray-600 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.duration_days" required />
+                    <TextInput id="duration_days" type="number" min="1" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.duration_days" required />
                     <InputError class="mt-2" :message="form.errors.duration_days" />
                 </div>
                  <div>
                     <InputLabel for="price" value="Harga (Rp)" class="!text-brand-cyan !font-semibold" />
-                    <TextInput id="price" type="number" min="0" step="1000" class="mt-1 block w-full bg-gray-700 border-gray-600 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.price" required />
+                    <TextInput id="price" type="number" min="0" step="1000" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.price" required />
                     <InputError class="mt-2" :message="form.errors.price" />
                 </div>
                  <div>
                     <InputLabel for="discount_percent" value="Diskon (%)" class="!text-brand-cyan !font-semibold" />
-                    <TextInput id="discount_percent" type="number" min="0" max="100" class="mt-1 block w-full bg-gray-700 border-gray-600 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.discount_percent" />
+                    <TextInput id="discount_percent" type="number" min="0" max="100" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.discount_percent" />
                     <InputError class="mt-2" :message="form.errors.discount_percent" />
                 </div>
             </div>
@@ -117,13 +119,27 @@ const submit = () => {
 
             <div>
                 <InputLabel for="category" value="Kategori (Opsional, cth: Short Trip, Honeymoon)" class="!text-brand-cyan !font-semibold" />
-                <TextInput id="category" type="text" class="mt-1 block w-full bg-gray-700 border-gray-600 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.category" />
+                <TextInput id="category" type="text" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.category" />
                 <InputError class="mt-2" :message="form.errors.category" />
             </div>
 
             <div>
+                <InputLabel for="pickup_time" value="Jam Keberangkatan (cth: 08:00)" class="!text-brand-cyan !font-semibold" />
+                <TextInput id="pickup_time" type="time" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm text-white" v-model="form.pickup_time" />
+                <InputError class="mt-2" :message="form.errors.pickup_time" />
+            </div>
+
+            <div class="space-y-3 pt-2">
+                <label class="flex items-center">
+                    <Checkbox name="is_children_friendly" class="rounded border-gray-500 text-brand-blue focus:ring-brand-blue" v-model:checked="form.is_children_friendly" />
+                    <span class="ms-2 text-sm text-gray-300">Children Friendly (Paket ini cocok untuk anak-anak)</span>
+                </label>
+                <InputError class="mt-2" :message="form.errors.is_children_friendly" />
+            </div>
+
+            <div>
                 <InputLabel for="status" value="Status" class="!text-brand-cyan !font-semibold" />
-                <select id="status" v-model="form.status" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
+                <select id="status" v-model="form.status" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
                 </select>

@@ -12,21 +12,28 @@ class Booking extends Model
     protected $fillable = [
         'booking_code',
         'user_id',
+        'guest_name',
         'tour_package_id',
         'departure_date',
         'num_participants',
+        'num_adults',
+        'num_children',
         'contact_email',
         'contact_phone',
+        'country_code',
+        'country',
         'package_price_at_booking',
         'discount_at_booking',
         'total_price',
         'status',
         'special_requests',
+        'pickup_location',
         'assigned_driver_id',
         'assigned_guide_id',
         'assigned_vehicle_id',
         'snap_token',
         'end_date',
+        'locale',
     ];
 
     // Relasi ke User (Pemesan)

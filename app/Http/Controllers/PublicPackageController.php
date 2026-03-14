@@ -132,7 +132,8 @@ class PublicPackageController extends Controller
         ]);
 
         return Inertia::render('Package/Show', [
-            'package' => $package
+            'package' => $package,
+            'adminWhatsappNumber' => config('app.admin_whatsapp_number')
         ]);
     }
 }

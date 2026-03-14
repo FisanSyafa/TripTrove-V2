@@ -54,6 +54,8 @@ class PackageController extends Controller
             'cover_image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048',
             'status' => 'required|in:published,draft',
             'category' => 'nullable|string|max:255',
+            'pickup_time' => 'nullable|string|max:10',
+            'is_children_friendly' => 'boolean',
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
@@ -76,6 +78,7 @@ class PackageController extends Controller
         $validated['includes_guide'] = $request->boolean('includes_guide');
         $validated['includes_entrance_fee'] = $request->boolean('includes_entrance_fee');
         $validated['includes_driver_vehicle'] = $request->boolean('includes_driver_vehicle');
+        $validated['is_children_friendly'] = $request->boolean('is_children_friendly');
 
 
         TourPackage::create($validated);
@@ -107,6 +110,8 @@ class PackageController extends Controller
             'cover_image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'status' => 'required|in:published,draft',
             'category' => 'nullable|string|max:255',
+            'pickup_time' => 'nullable|string|max:10',
+            'is_children_friendly' => 'boolean',
         ]);
 
         if ($validated['name'] !== $package->name) {
@@ -134,6 +139,7 @@ class PackageController extends Controller
         $validated['includes_guide'] = $request->boolean('includes_guide');
         $validated['includes_entrance_fee'] = $request->boolean('includes_entrance_fee');
         $validated['includes_driver_vehicle'] = $request->boolean('includes_driver_vehicle');
+        $validated['is_children_friendly'] = $request->boolean('is_children_friendly');
 
         $package->update($validated);
         return redirect()->route('admin.packages.index')->with('message', 'Paket berhasil diperbarui.');

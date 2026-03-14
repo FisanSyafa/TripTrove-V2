@@ -24,6 +24,7 @@ class BookingController extends Controller
             ->with(['user', 'tourPackage']) // Eager load relasi
             ->when($request->input('search'), function($query, $search) {
                 $query->where('booking_code', 'like', "%{$search}%")
+                      ->orWhere('guest_name', 'like', "%{$search}%") // Search guest name
                       ->orWhereHas('user', fn($q) => $q->where('name', 'like', "%{$search}%"))
                       ->orWhereHas('tourPackage', fn($q) => $q->where('name', 'like', "%{$search}%"));
             })

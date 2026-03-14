@@ -36,12 +36,12 @@ watch(search, throttle(function (value) {
 
         <div class="mb-4">
             <input type="text" v-model="search" placeholder="Cari kode booking, nama user, atau paket..."
-                   class="w-full md:w-1/2 bg-gray-700 border-gray-600 rounded-lg px-4 py-2 focus:ring-brand-cyan focus:border-brand-cyan transition text-white shadow-sm">
+                   class="w-full md:w-1/2 bg-[#111c2e] border-gray-600/50 rounded-xl px-4 py-2.5 focus:ring-brand-cyan focus:border-brand-cyan transition text-gray-100 shadow-sm placeholder-gray-500">
         </div>
 
-        <div class="bg-gray-800 rounded-lg shadow-lg overflow-x-auto border border-brand-border">
+        <div class="bg-[#111c2e] rounded-xl shadow-lg overflow-x-auto border border-gray-700/40">
             <table class="w-full text-left text-sm text-gray-300">
-                <thead class="bg-gray-700/50 border-b border-gray-600 text-xs uppercase tracking-wider">
+                <thead class="bg-[#0c1222]/80 border-b border-gray-600/50 text-xs uppercase tracking-wider text-gray-400">
                     <tr>
                         <th class="p-4">Kode Booking</th>
                         <th class="p-4">Pelanggan</th>
@@ -57,7 +57,7 @@ watch(search, throttle(function (value) {
                     </tr>
                     <tr v-for="booking in bookings.data" :key="booking.id" class="border-b border-gray-700 hover:bg-gray-700/30 transition-colors duration-150">
                         <td class="p-4 font-mono text-white">{{ booking.booking_code }}</td>
-                        <td class="p-4">{{ booking.user.name }}</td>
+                        <td class="p-4">{{ booking.user ? booking.user.name : booking.guest_name }}</td>
                         <td class="p-4">{{ booking.tour_package.name }}</td>
                         <td class="p-4">{{ booking.departure_date }}</td>
                         <td class="p-4">

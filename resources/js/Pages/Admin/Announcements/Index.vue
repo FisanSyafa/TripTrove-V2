@@ -40,18 +40,18 @@ const formatDate = (dateString) => {
             </Link>
         </div>
 
-        <div class="bg-gray-800 rounded-lg shadow-lg border border-brand-border overflow-hidden">
+        <div class="bg-[#111c2e] rounded-xl shadow-lg border border-gray-700/40 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-700">
-                    <thead class="bg-gray-700">
+                    <thead class="bg-[#0c1222]/80">
                         <tr>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-300 uppercase tracking-wider">Message</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-300 uppercase tracking-wider">Status</th>
-                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-300 uppercase tracking-wider">Created At</th>
-                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-300 uppercase tracking-wider">Actions</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Message</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Status</th>
+                            <th class="px-6 py-4 text-left text-xs font-bold text-gray-400 uppercase tracking-wider">Created At</th>
+                            <th class="px-6 py-4 text-right text-xs font-bold text-gray-400 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-gray-800 divide-y divide-gray-700">
+                    <tbody class="bg-[#111c2e] divide-y divide-gray-700/40">
                         <tr v-for="item in announcements.data" :key="item.id" class="hover:bg-gray-700/50 transition-colors">
                             <td class="px-6 py-4 text-sm text-white font-medium">
                                 {{ item.message }}

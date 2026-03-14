@@ -35,13 +35,13 @@ const submit = () => {
 
         <h1 class="text-3xl font-bold mb-6 text-brand-cyan">Tambah User Baru (Driver/Guide)</h1>
 
-        <form @submit.prevent="submit" class="max-w-xl space-y-6 bg-gray-800 p-8 rounded-lg shadow-lg border border-brand-border">
+        <form @submit.prevent="submit" class="max-w-xl space-y-6 bg-[#111c2e] p-8 rounded-xl shadow-lg border border-gray-700/40">
             <div>
                 <InputLabel for="name" value="Nama" class="!text-brand-cyan" />
                 <TextInput
                     id="name"
                     type="text"
-                    class="mt-1 block w-full bg-gray-700 text-white border-gray-600"
+                    class="mt-1 block w-full bg-[#0c1222] text-white border-gray-600/50"
                     v-model="form.name"
                     required
                     autofocus
@@ -55,7 +55,7 @@ const submit = () => {
                 <TextInput
                     id="email"
                     type="email"
-                    class="mt-1 block w-full bg-gray-700 text-white border-gray-600"
+                    class="mt-1 block w-full bg-[#0c1222] text-white border-gray-600/50"
                     v-model="form.email"
                     required
                     autocomplete="username"
@@ -67,7 +67,7 @@ const submit = () => {
                 <InputLabel for="role" value="Role" class="!text-brand-cyan" />
                 <select
                     id="role"
-                    class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white"
+                    class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white"
                     v-model="form.role"
                     required
                 >
@@ -84,7 +84,7 @@ const submit = () => {
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full bg-gray-700 text-white border-gray-600"
+                    class="mt-1 block w-full bg-[#0c1222] text-white border-gray-600/50"
                     v-model="form.password"
                     required
                     autocomplete="new-password"
@@ -97,7 +97,7 @@ const submit = () => {
                 <TextInput
                     id="password_confirmation"
                     type="password"
-                    class="mt-1 block w-full bg-gray-700 text-white border-gray-600"
+                    class="mt-1 block w-full bg-[#0c1222] text-white border-gray-600/50"
                     v-model="form.password_confirmation"
                     required
                     autocomplete="new-password"

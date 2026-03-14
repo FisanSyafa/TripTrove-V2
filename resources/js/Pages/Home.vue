@@ -80,10 +80,10 @@ const openFloatingWhatsApp = () => {
 };
 
 const faqs = ref([
-    { question: 'How do I book a tour package?', answer: 'You can book a package by clicking "Book Now" on the package details page.', active: false },
-    { question: 'Can I change my departure date?', answer: 'Schedule changes are possible subject to terms and conditions.', active: false },
-    { question: 'Is the price all-inclusive?', answer: 'Generally, accommodation, tours, and some meals are included.', active: false },
-    { question: 'Is traveling with TripTrove safe?', answer: 'Your safety is our priority.', active: false }
+    { question: __('How do I book a tour package?'), answer: __('You can book a package by clicking "Book Now" on the package details page.'), active: false },
+    { question: __('Can I change my departure date?'), answer: __('Schedule changes are possible subject to terms and conditions.'), active: false },
+    { question: __('Is the price all-inclusive?'), answer: __('Generally, accommodation, tours, and some meals are included.'), active: false },
+    { question: __('Is traveling with TripTrove safe?'), answer: __('Your safety is our priority.'), active: false }
 ]);
 const toggleFaq = (index) => { faqs.value[index].active = !faqs.value[index].active; };
 const form = useForm({ name: '', email: '', phone_number: '', subject: '', message: '' });
@@ -105,13 +105,14 @@ const submitContact = () => {
 const features = ref([
     { title: 'Global Destinations', description: 'Explore 100+ curated destinations worldwide designed for your ultimate comfort.' },
     { title: 'Best Price Guarantee', description: 'We offer competitive pricing and the best value without compromising on quality.' },
-    { title: 'Safe & Trusted', description: 'Your safety is our top priority with verified partners and 24/7 support.' },
+    { title: 'Safe & Trusted', description: 'Your safety is our top priority with 24/7 support.' },
     { title: 'Professional Guides', description: 'Our experienced and friendly guides are ready to make your trip unforgettable.' }
 ]);
 </script>
 
 <template>
     <MainLayout>
+        <Head title="" />
         <section class="relative min-h-screen flex items-center overflow-hidden bg-[url('/images/main-photo.jpg')] bg-cover bg-center bg-no-repeat">
             <div class="absolute inset-0 bg-gradient-to-r from-gray-900 via-gray-900/80 to-gray-900/40 z-0"></div>
             
@@ -202,6 +203,30 @@ const features = ref([
                                     </PrimaryButton>
                                 </div>
                             </form>
+                        </div>
+
+                        <!-- OR Divider -->
+                        <div class="w-full max-w-2xl flex items-center gap-4 my-6">
+                            <div class="flex-1 h-px bg-white/30"></div>
+                            <span class="text-white/70 font-semibold text-sm uppercase tracking-wider">{{ __('or') }}</span>
+                            <div class="flex-1 h-px bg-white/30"></div>
+                        </div>
+
+                        <!-- Dream Tour Button - Outside Container -->
+                        <div class="w-full max-w-2xl">
+                            <Link 
+                                :href="route('dream-tour.create')" 
+                                class="inline-flex items-center justify-center gap-3 w-full px-8 py-4 rounded-2xl font-bold text-base
+                                       bg-gradient-to-r from-brand-cyan to-brand-blue text-white
+                                       shadow-[0_0_30px_rgba(0,212,255,0.4)] border-2 border-white/30
+                                       hover:shadow-[0_0_40px_rgba(0,212,255,0.6)] hover:scale-105 hover:brightness-110 hover:border-white/50
+                                       active:scale-95 transition-all duration-300"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+                                </svg>
+                                {{ __('Create Your Dream Trip') }}
+                            </Link>
                         </div>
                         </div>
 
@@ -338,6 +363,49 @@ const features = ref([
             </div>
         </section>
 
+                <!-- DREAM TOUR CTA SECTION -->
+        <section class="py-16 px-4 md:py-24 md:px-6 bg-white overflow-hidden">
+            <div class="container mx-auto max-w-6xl">
+                <div class="relative bg-gray-900 rounded-[3rem] p-8 md:p-16 shadow-2xl overflow-hidden group">
+                    <!-- Background blobs -->
+                    <div class="absolute -top-20 -right-20 w-80 h-80 bg-brand-cyan/15 rounded-full blur-[100px] pointer-events-none"></div>
+                    <div class="absolute -bottom-20 -left-20 w-80 h-80 bg-brand-blue/15 rounded-full blur-[100px] pointer-events-none transition-transform group-hover:scale-110"></div>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center relative z-10">
+                        <div class="text-center lg:text-left">
+                            <span class="inline-block py-1 px-4 mb-4 border-l-4 border-brand-cyan text-brand-cyan font-bold tracking-[0.2em] uppercase text-xs">
+                                {{ __('Custom Experience') }}
+                            </span>
+                            <h2 class="text-3xl md:text-5xl font-black text-white mb-6 leading-tight">
+                                {{ __('Request Your Dream Tour') }}
+                            </h2>
+                            <p class="text-gray-400 text-lg mb-10 leading-relaxed">
+                                {{ __('Can\'t find the perfect itinerary? We will listen to your ideas and create a bespoke journey that matches your interests, pace, and budget perfectly.') }}
+                            </p>
+                            <Link 
+                                :href="route('dream-tour.create')"
+                                class="inline-flex items-center gap-3 bg-white text-gray-900 hover:bg-brand-cyan hover:text-white px-10 py-5 rounded-2xl font-black text-xl shadow-xl transition-all duration-300 transform hover:-translate-y-1 active:scale-95 group/btn"
+                            >
+                                {{ __('Start Planning Now') }}
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 group-hover/btn:translate-x-2 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                                </svg>
+                            </Link>
+                        </div>
+                        <div class="hidden lg:block relative">
+                            <div class="relative rounded-3xl overflow-hidden shadow-2xl border-4 border-white/5 transform rotate-2 group-hover:rotate-0 transition-transform duration-700">
+                                <img src="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&q=80&w=1000" alt="Dream Tour" class="w-full h-[400px] object-cover group-hover:scale-110 transition-transform duration-[2000ms]">
+                                <div class="absolute inset-0 bg-gradient-to-t from-gray-900/60 to-transparent"></div>
+                                <div class="absolute bottom-6 left-6 right-6 p-4 backdrop-blur-md bg-white/10 rounded-2xl border border-white/20">
+                                    <p class="text-white font-bold italic">"{{ __('Let\'s create something extraordinary together.') }}"</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="features" class="py-12 px-4 md:py-20 md:px-6 bg-white relative">
             <div class="container mx-auto max-w-7xl">
                 <div class="text-center mb-10 md:mb-16 max-w-3xl mx-auto">
@@ -464,7 +532,7 @@ const features = ref([
 @keyframes slowZoom { from { transform: scale(1.0); } to { transform: scale(1.1); } }
 @keyframes shimmer { 100% { transform: translateX(100%); } }
 .animate-shimmer { animation: shimmer 2s infinite; }
-.section-title-light { text-align: center; font-weight: 700; margin-bottom: 1.5rem; background: linear-gradient(135deg, #00d4ff, #007bff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.section-title-light { text-align: center; font-weight: 700; margin-bottom: 1.5rem; background: linear-gradient(135deg, #00d4ff, #007bff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 @media (min-width: 768px) { .section-title-light { margin-bottom: 2rem; } }
 .feature-card-light { background: #FFFFFF; padding: 2rem; border-radius: 20px; border: 1px solid #E5E7EB; transition: all 0.3s; text-align: center; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); }
 .feature-card-light:hover { transform: translateY(-10px); border-color: #00d4ff; box-shadow: 0 10px 40px rgba(0, 212, 255, 0.15); }

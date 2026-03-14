@@ -10,6 +10,7 @@ use App\Http\Controllers\PublicPackageController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\DreamTourController;
 
 // Import Controller Admin
 use App\Http\Controllers\Admin\PackageController as AdminPackageController;
@@ -89,9 +90,21 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 
 // Proses booking tanpa auth
 Route::get('/book/{package:slug}', [BookingController::class, 'create'])->name('booking.create');
+Route::post('/book', [BookingController::class, 'store'])->name('booking.store');
+
+// Payment (accessible by guest and logged-in users)
+Route::get('bookings/{booking}/payment', [PaymentController::class, 'create'])->name('payment.create');
+Route::post('bookings/{booking}/payment', [PaymentController::class, 'store'])->name('payment.store');
+Route::match(['get', 'post'], 'bookings/{booking}/payment/success', [PaymentController::class, 'handleSuccess'])->name('payment.success');
+Route::get('bookings/{booking}/payment-success', [PaymentController::class, 'success'])->name('payment.success.page');
+Route::post('bookings/{booking}/pay-on-arrival', [BookingController::class, 'payOnArrival'])->name('booking.pay-on-arrival');
 
 // BARU: Halaman Semua Paket (dengan filter)
 Route::get('/packages', [PublicPackageController::class, 'allPackages'])->name('packages.all');
+
+// Dream Tour Request
+Route::get('/dream-tour', [DreamTourController::class, 'create'])->name('dream-tour.create');
+Route::post('/dream-tour', [DreamTourController::class, 'store'])->name('dream-tour.store');
 
 // Halaman Detail Paket
 Route::get('/paket/{package:slug}', [PublicPackageController::class, 'show'])->name('packages.show');
@@ -110,23 +123,23 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Proses Booking
-    Route::post('/book', [BookingController::class, 'store'])->name('booking.store');
+    // Proses Booking (keep for backward compatibility - redirect to public route)
+    // Route::post('/book', [BookingController::class, 'store'])->name('booking.store');
 
     // Review
     Route::get('bookings/{booking}/review', [UserReviewController::class, 'create'])->name('reviews.create');
     Route::post('reviews', [UserReviewController::class, 'store'])->name('reviews.store');
 
-    // Payment
-    Route::get('bookings/{booking}/payment', [PaymentController::class, 'create'])->name('payment.create');
-    Route::post('bookings/{booking}/payment', [PaymentController::class, 'store'])->name('payment.store');
-    Route::post('bookings/{booking}/payment/success', [PaymentController::class, 'handleSuccess'])->name('payment.success');
+    // Payment managed by public route now
+    // Route::get('bookings/{booking}/payment', [PaymentController::class, 'create'])->name('payment.create');
+    // Route::post('bookings/{booking}/payment', [PaymentController::class, 'store'])->name('payment.store');
+    // Route::post('bookings/{booking}/payment/success', [PaymentController::class, 'handleSuccess'])->name('payment.success');
 
     // Invoice
     Route::get('bookings/{booking}/invoice', [BookingController::class, 'invoice'])->name('booking.invoice');
     
-    // Pay on Arrival
-    Route::post('bookings/{booking}/pay-on-arrival', [BookingController::class, 'payOnArrival'])->name('booking.pay-on-arrival');
+    // Pay on Arrival managed by public route now
+    // Route::post('bookings/{booking}/pay-on-arrival', [BookingController::class, 'payOnArrival'])->name('booking.pay-on-arrival');
 
     // Route::get('/', [PublicPackageController::class, 'index'])->name('home');
 });
@@ -166,6 +179,11 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::delete('messages/{message}', [MessageController::class, 'destroy'])->name('messages.destroy');
     
     Route::resource('announcements', AnnouncementController::class);
+
+    // Dream Tour Requests
+    Route::get('dream-tour-requests', [\App\Http\Controllers\Admin\DreamTourRequestController::class, 'index'])->name('dream-tour-requests.index');
+    Route::get('dream-tour-requests/{dreamTourRequest}', [\App\Http\Controllers\Admin\DreamTourRequestController::class, 'show'])->name('dream-tour-requests.show');
+    Route::put('dream-tour-requests/{dreamTourRequest}', [\App\Http\Controllers\Admin\DreamTourRequestController::class, 'update'])->name('dream-tour-requests.update');
 
     // Export Routes
     Route::get('export/revenue', [AdminDashboardController::class, 'exportRevenueCsv'])->name('export.revenue');

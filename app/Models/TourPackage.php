@@ -26,6 +26,20 @@ class TourPackage extends Model
         'cover_image_url',
         'status',
         'category',
+        'pickup_time',
+        'is_children_friendly',
+    ];
+
+    protected $casts = [
+        'duration_days' => 'integer',
+        'price' => 'decimal:2',
+        'discount_percent' => 'integer',
+        'sold_count' => 'integer',
+        'includes_hotel' => 'boolean',
+        'includes_guide' => 'boolean',
+        'includes_entrance_fee' => 'boolean',
+        'includes_driver_vehicle' => 'boolean',
+        'is_children_friendly' => 'boolean',
     ];
 
     // Relasi: Satu paket bisa dibooking berkali-kali

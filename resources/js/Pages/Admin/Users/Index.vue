@@ -52,12 +52,12 @@ const confirmDelete = (user) => {
 
         <div class="mb-4">
             <input type="text" v-model="search" placeholder="Cari nama atau email..."
-                   class="w-full md:w-1/3 bg-gray-700 border-gray-600 rounded-lg px-4 py-2 focus:ring-brand-cyan focus:border-brand-cyan transition text-white shadow-sm">
+                   class="w-full md:w-1/3 bg-[#111c2e] border-gray-600/50 rounded-xl px-4 py-2.5 focus:ring-brand-cyan focus:border-brand-cyan transition text-gray-100 shadow-sm placeholder-gray-500">
         </div>
 
-        <div class="bg-gray-800 rounded-lg shadow-lg overflow-x-auto border border-brand-border">
+        <div class="bg-[#111c2e] rounded-xl shadow-lg overflow-x-auto border border-gray-700/40">
             <table class="w-full text-left text-sm text-gray-300">
-                <thead class="bg-gray-700/50 border-b border-gray-600 text-xs uppercase">
+                <thead class="bg-[#0c1222]/80 border-b border-gray-600/50 text-xs uppercase text-gray-400">
                     <tr>
                         <th class="p-4">Nama</th>
                         <th class="p-4">Email</th>

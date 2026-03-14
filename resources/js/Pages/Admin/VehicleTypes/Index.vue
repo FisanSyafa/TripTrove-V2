@@ -28,9 +28,9 @@ const deleteType = (id) => {
         <div v-if="$page.props.flash?.message" class="bg-green-600 text-white p-4 rounded-lg mb-4">{{ $page.props.flash.message }}</div>
         <div v-if="$page.props.flash?.error" class="bg-red-600 text-white p-4 rounded-lg mb-4">{{ $page.props.flash.error }}</div>
 
-        <div class="bg-gray-800 rounded-lg shadow-lg overflow-x-auto border border-brand-border">
+        <div class="bg-[#111c2e] rounded-xl shadow-lg overflow-x-auto border border-gray-700/40">
             <table class="w-full text-left text-sm text-gray-300">
-                <thead class="bg-gray-700/50 border-b border-gray-600 text-xs uppercase">
+                <thead class="bg-[#0c1222]/80 border-b border-gray-600/50 text-xs uppercase text-gray-400">
                     <tr>
                         <th class="p-4">Nama Tipe</th>
                         <th class="p-4">Kode</th>

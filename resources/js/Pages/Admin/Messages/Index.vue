@@ -69,10 +69,10 @@ const replyViaWa = (msg) => {
             {{ $page.props.flash.message }}
         </div>
 
-        <div class="bg-gray-800 rounded-lg shadow-lg overflow-hidden border border-gray-700">
+        <div class="bg-[#111c2e] rounded-xl shadow-lg overflow-hidden border border-gray-700/40">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm text-gray-300">
-                    <thead class="bg-gray-700/50 border-b border-gray-600 text-xs uppercase text-gray-400">
+                    <thead class="bg-[#0c1222]/80 border-b border-gray-600/50 text-xs uppercase text-gray-400">
                         <tr>
                             <th class="p-4 font-semibold tracking-wide">Tanggal</th>
                             <th class="p-4 font-semibold tracking-wide">Pengirim</th>
@@ -162,7 +162,7 @@ const replyViaWa = (msg) => {
         </div>
 
         <div v-if="showModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4" @click.self="closeDetail">
-            <div class="bg-gray-800 rounded-xl shadow-2xl w-full max-w-2xl border border-gray-700 transform transition-all scale-100">
+            <div class="bg-[#111c2e] rounded-xl shadow-2xl w-full max-w-2xl border border-gray-700/40 transform transition-all scale-100">
                 
                 <div class="flex justify-between items-center p-6 border-b border-gray-700 bg-gray-750 rounded-t-xl">
                     <h3 class="text-xl font-bold text-white">Detail Pesan</h3>

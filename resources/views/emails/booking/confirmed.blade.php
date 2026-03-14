@@ -34,7 +34,7 @@
         </div>
         
         <div class="content">
-            <p>{{ __('Hello') }}, <strong>{{ $user->name }}</strong>!</p>
+            <p>{{ __('Hello') }}, <strong>{{ $booking->user ? $booking->user->name : $booking->guest_name }}</strong>!</p>
             
             <p>{{ __('Great news! Your booking has been confirmed by our team. Get ready for an unforgettable adventure!') }}</p>
             
@@ -73,7 +73,7 @@
             </div>
 
             <center>
-                <a href="{{ config('app.url') }}/dashboard" class="button">{{ __('View Booking Details') }}</a>
+                <a href="https://triptrovetravel.com" class="button">{{ __('View Another Package') }}</a>
             </center>
 
             <p>{{ __('If you have any questions or changes, please contact our team immediately.') }}</p>

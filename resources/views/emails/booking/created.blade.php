@@ -27,7 +27,7 @@
             <div class="logo-container">
                 <img src="{{ $message->embed(public_path('images/logo_triptrove_putih.png')) }}" alt="TripTrove" class="logo">
             </div>
-            <h1>👋 {{ __('Hello') }}, {{ $user->name }}!</h1>
+            <h1>👋 {{ __('Hello') }}, {{ $booking->user ? $booking->user->name : $booking->guest_name }}!</h1>
         </div>
         
         <div class="content">
@@ -43,13 +43,8 @@
                 <p><strong>{{ __('Total Payment') }}:</strong> Rp {{ number_format($booking->total_price, 0, ',', '.') }}</p>
             </div>
 
-            <div class="next-steps">
-                <h3>📋 {{ __('Next Steps') }}</h3>
-                <p>{{ __('Please complete the payment to confirm your booking. You can make payment through your account dashboard.') }}</p>
-            </div>
-
             <center>
-                <a href="{{ config('app.url') }}/dashboard" class="button">{{ __('View Dashboard') }}</a>
+                <a href="https://triptrovetravel.com" class="button">{{ __('View Another Package') }}</a>
             </center>
 
             <p>{{ __('If you have any questions, feel free to contact our support team.') }}</p>

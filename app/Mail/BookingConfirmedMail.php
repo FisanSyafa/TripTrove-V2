@@ -7,6 +7,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\App;
 
 class BookingConfirmedMail extends Mailable
 {
@@ -21,13 +22,21 @@ class BookingConfirmedMail extends Mailable
 
     public function envelope(): Envelope
     {
+        // Set locale for email (fallback to 'id' if locale column doesn't exist yet)
+        $locale = isset($this->booking->locale) ? $this->booking->locale : 'id';
+        App::setLocale($locale);
+        
         return new Envelope(
-            subject: 'Booking Dikonfirmasi - ' . $this->booking->booking_code,
+            subject: __('Booking Confirmed') . ' - ' . $this->booking->booking_code,
         );
     }
 
     public function content(): Content
     {
+        // Set locale for email content (fallback to 'id' if locale column doesn't exist yet)
+        $locale = isset($this->booking->locale) ? $this->booking->locale : 'id';
+        App::setLocale($locale);
+        
         return new Content(
             view: 'emails.booking.confirmed',
             with: [

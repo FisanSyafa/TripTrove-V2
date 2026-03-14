@@ -150,6 +150,19 @@
         }
         .print-button:hover { background: #0056b3; }
         
+        @media screen and (max-width: 600px) {
+            .invoice-container { padding: 20px; }
+            .header { flex-direction: column; text-align: center; }
+            .invoice-info { text-align: center; margin-top: 20px; }
+            .two-column { grid-template-columns: 1fr; gap: 20px; }
+            .total-row { justify-content: space-between; }
+            .total-label { width: auto; text-align: left; padding-right: 10px; }
+            .total-value { width: auto; }
+            table { font-size: 12px; }
+            th, td { padding: 8px 5px; }
+            .logo { margin: 0 auto; }
+        }
+        
         @media print {
             body { background: white; padding: 0; }
             .invoice-container { box-shadow: none; padding: 20px; }
@@ -196,7 +209,7 @@
                 <div>
                     <div class="section-title">{{ __('Bill To') }}</div>
                     <div class="info-box">
-                        <p><strong>{{ __('Name') }}:</strong> {{ $booking->user->name }}</p>
+                        <p><strong>{{ __('Name') }}:</strong> {{ $booking->user ? $booking->user->name : $booking->guest_name }}</p>
                         <p><strong>{{ __('Email') }}:</strong> {{ $booking->contact_email }}</p>
                         <p><strong>{{ __('Phone') }}:</strong> {{ $booking->contact_phone }}</p>
                     </div>
@@ -205,7 +218,7 @@
                     <div class="section-title">{{ __('Trip Information') }}</div>
                     <div class="info-box">
                         <p><strong>{{ __('Departure Date') }}:</strong> {{ \Carbon\Carbon::parse($booking->departure_date)->translatedFormat('d F Y') }}</p>
-                        <p><strong>{{ __('End Date') }}:</strong> {{ \Carbon\Carbon::parse($booking->end_date)->translatedFormat('d F Y') }}</p>
+                        <p><strong>{{ __('Pickup Time') }}:</strong> {{ $booking->tourPackage->pickup_time ?: '-' }}</p>
                         <p><strong>{{ __('Duration') }}:</strong> {{ $booking->tourPackage->duration_days }} {{ __('Days') }}</p>
                     </div>
                 </div>
@@ -231,7 +244,12 @@
                             <strong>{{ $booking->tourPackage->name }}</strong><br>
                             <small style="color: #666;">{{ $booking->tourPackage->destination_summary }}</small>
                         </td>
-                        <td style="text-align: center;">{{ $booking->num_participants }} {{ __('people') }}</td>
+                        <td style="text-align: center;">
+                            {{ $booking->num_adults }} {{ __('Adult') }}
+                            @if($booking->num_children > 0)
+                                <br>{{ $booking->num_children }} {{ __('Children') }}
+                            @endif
+                        </td>
                         <td style="text-align: right;">Rp {{ number_format($booking->package_price_at_booking, 0, ',', '.') }}</td>
                         <td style="text-align: right;">{{ $booking->discount_at_booking }}%</td>
                         <td style="text-align: right;">Rp {{ number_format($booking->total_price, 0, ',', '.') }}</td>

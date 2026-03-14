@@ -31,7 +31,7 @@
         </div>
         
         <div class="content">
-            <p>{{ __('Hello') }}, <strong>{{ $user->name }}</strong>!</p>
+            <p>{{ __('Hello') }}, <strong>{{ $booking->user ? $booking->user->name : $booking->guest_name }}</strong>!</p>
             
             <p>{{ __('We have received your payment. Your booking is being processed by our team.') }}</p>
             
@@ -44,13 +44,8 @@
                 <p><strong>{{ __('Status') }}:</strong> <span class="status-badge">{{ __('Waiting for Confirmation') }}</span></p>
             </div>
 
-            <div class="info-box">
-                <strong>ℹ️ {{ __('What\'s Next?') }}</strong>
-                <p style="margin-bottom: 0;">{{ __('Our team will process your booking shortly and send you a confirmation within 24 hours. You will receive a confirmation email with your trip details.') }}</p>
-            </div>
-
             <center>
-                <a href="{{ config('app.url') }}/dashboard" class="button">{{ __('View Booking Status') }}</a>
+                <a href="https://triptrovetravel.com" class="button">{{ __('View Another Package') }}</a>
             </center>
 
             <p>{{ __('Thank you for trusting TripTrove with your journey!') }}</p>

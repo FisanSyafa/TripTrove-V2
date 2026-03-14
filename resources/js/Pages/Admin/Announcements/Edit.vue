@@ -33,8 +33,8 @@ const submit = () => {
         </Link>
 
         <div class="max-w-2xl mx-auto">
-            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                <h2 class="text-2xl font-bold mb-6 text-brand-cyan border-b border-gray-700 pb-2">Edit Announcement</h2>
+            <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                <h2 class="text-2xl font-bold mb-6 text-brand-cyan border-b border-gray-600/50 pb-2">Edit Announcement</h2>
                 
                 <form @submit.prevent="submit" class="space-y-6">
                     
@@ -43,7 +43,7 @@ const submit = () => {
                         <TextInput 
                             id="message" 
                             type="text" 
-                            class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white" 
+                            class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white" 
                             v-model="form.message" 
                             required 
                             autofocus 
@@ -51,7 +51,7 @@ const submit = () => {
                         <InputError class="mt-2" :message="form.errors.message" />
                     </div>
 
-                    <div class="flex items-center p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                    <div class="flex items-center p-4 bg-[#0c1222]/60 rounded-lg border border-gray-600/50">
                         <Checkbox 
                             name="is_active" 
                             v-model:checked="form.is_active" 

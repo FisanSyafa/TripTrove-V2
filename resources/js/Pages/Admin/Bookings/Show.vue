@@ -90,7 +90,7 @@ const storageUrl = (path) => {
                 
                 <div 
                     v-if="booking.payments.length > 0" 
-                    class="bg-gray-800 rounded-lg shadow-lg p-6"
+                    class="bg-[#111c2e] rounded-xl shadow-lg p-6"
                     :class="{ 
                         'border-2 border-yellow-500': booking.status === 'waiting_confirmation',
                         'border border-brand-border': booking.status !== 'waiting_confirmation'
@@ -100,7 +100,7 @@ const storageUrl = (path) => {
                         Data Pembayaran
                         <span 
                             v-if="booking.status === 'waiting_confirmation'"
-                            class="px-3 py-1 text-xs font-bold rounded-full uppercase bg-yellow-500/80 text-yellow-100 border border-yellow-600"
+                            class="px-3 py-1 text-xs font-bold rounded-full uppercase bg-yellow-500/20 text-yellow-400 border border-yellow-500/30"
                         >
                             Perlu Konfirmasi
                         </span>
@@ -130,8 +130,8 @@ const storageUrl = (path) => {
                         </div>
                     </dl>
                 </div>
-                <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                    <h2 class="text-2xl font-bold mb-4 text-brand-cyan border-b border-gray-700 pb-2">Detail Booking</h2>
+                <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-cyan border-b border-gray-600/50 pb-2">Detail Booking</h2>
                     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                         <div class="sm:col-span-1">
                             <dt class="font-semibold text-gray-400">Kode Booking:</dt>
@@ -159,7 +159,10 @@ const storageUrl = (path) => {
                          </div>
                         <div class="sm:col-span-1">
                             <dt class="font-semibold text-gray-400">Pelanggan:</dt>
-                            <dd class="text-white">{{ booking.user.name }} ({{ booking.user.email }})</dd>
+                            <dd class="text-white">
+                                {{ booking.user ? booking.user.name : booking.guest_name }} 
+                                ({{ booking.user ? booking.user.email : booking.contact_email }})
+                            </dd>
                         </div>
                          <div class="sm:col-span-1">
                             <dt class="font-semibold text-gray-400">Tanggal Pesan:</dt>
@@ -192,8 +195,8 @@ const storageUrl = (path) => {
                     </dl>
                 </div>
 
-                <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                    <h2 class="text-2xl font-bold mb-4 text-brand-cyan border-b border-gray-700 pb-2">Data Penumpang</h2>
+                <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-cyan border-b border-gray-600/50 pb-2">Data Penumpang</h2>
                     <table class="w-full text-left text-sm text-gray-300">
                         <thead class="border-b border-gray-600 text-xs uppercase tracking-wider">
                             <tr>
@@ -213,8 +216,8 @@ const storageUrl = (path) => {
                     </table>
                 </div>
 
-                 <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
-                    <h2 class="text-2xl font-bold mb-4 text-brand-cyan border-b border-gray-700 pb-2">Detail Assignment</h2>
+                 <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-cyan border-b border-gray-600/50 pb-2">Detail Assignment</h2>
                     <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
                         <div>
                              <dt class="font-semibold text-gray-400">Driver Ditugaskan:</dt>
@@ -234,12 +237,12 @@ const storageUrl = (path) => {
             </div>
 
             <div class="lg:col-span-1 space-y-6">
-                <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border sticky top-28">
-                    <h2 class="text-2xl font-bold mb-4 text-brand-cyan border-b border-gray-700 pb-2">Update Booking</h2>
+                <div class="bg-[#111c2e] rounded-xl shadow-lg p-6 border border-gray-700/40 sticky top-28">
+                    <h2 class="text-2xl font-bold mb-4 text-brand-cyan border-b border-gray-600/50 pb-2">Update Booking</h2>
                     <form @submit.prevent="updateBooking" class="space-y-4">
                         <div>
                             <InputLabel for="status" value="Status Booking" class="!text-brand-cyan !font-semibold" />
-                            <select id="status" v-model="form.status" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
+                            <select id="status" v-model="form.status" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
                                 <option value="pending">Pending</option>
                                 <option value="waiting_confirmation">Waiting Confirmation</option> <option value="paid">Paid</option>
                                 <option value="confirmed">Confirmed</option>
@@ -251,7 +254,7 @@ const storageUrl = (path) => {
 
                          <div>
                             <InputLabel for="assigned_driver_id" value="Assign Driver" class="!text-brand-cyan !font-semibold" />
-                            <select id="assigned_driver_id" v-model="form.assigned_driver_id" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
+                            <select id="assigned_driver_id" v-model="form.assigned_driver_id" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
                                 <option :value="null">-- Belum Ditugaskan --</option>
                                 <option v-for="driver in drivers" :key="driver.id" :value="driver.id">{{ driver.name }}</option>
                             </select>
@@ -260,7 +263,7 @@ const storageUrl = (path) => {
 
                          <div>
                             <InputLabel for="assigned_guide_id" value="Assign Guide" class="!text-brand-cyan !font-semibold" />
-                            <select id="assigned_guide_id" v-model="form.assigned_guide_id" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
+                            <select id="assigned_guide_id" v-model="form.assigned_guide_id" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
                                 <option :value="null">-- Belum Ditugaskan --</option>
                                 <option v-for="guide in guides" :key="guide.id" :value="guide.id">{{ guide.name }}</option>
                             </select>
@@ -269,7 +272,7 @@ const storageUrl = (path) => {
 
                         <div>
                             <InputLabel for="assigned_vehicle_id" value="Assign Vehicle" class="!text-brand-cyan !font-semibold" />
-                            <select id="assigned_vehicle_id" v-model="form.assigned_vehicle_id" class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
+                            <select id="assigned_vehicle_id" v-model="form.assigned_vehicle_id" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
                                 <option :value="null">-- Belum Ditugaskan --</option>
                                 <option v-for="vehicle in vehicles" :key="vehicle.id" :value="vehicle.id">{{ vehicle.name }} ({{ vehicle.license_plate }})</option>
                             </select>
