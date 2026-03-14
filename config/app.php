@@ -99,6 +99,18 @@ return [
 
     'key' => env('APP_KEY'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Admin WhatsApp Number
+    |--------------------------------------------------------------------------
+    |
+    | This is the admin WhatsApp number used for customer support and inquiries.
+    | It will be used throughout the application for contact purposes.
+    |
+    */
+
+    'admin_whatsapp_number' => env('ADMIN_WHATSAPP_NUMBER', '6285122605855'),
+
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', ''))

@@ -1,0 +1,79 @@
+<script setup>
+import AdminLayout from '@/Layouts/AdminLayout.vue';
+import { Head, useForm, Link } from '@inertiajs/vue3';
+import InputLabel from '@/Components/InputLabel.vue';
+import TextInput from '@/Components/TextInput.vue';
+import InputError from '@/Components/InputError.vue';
+import PrimaryButton from '@/Components/PrimaryButton.vue';
+import Checkbox from '@/Components/Checkbox.vue';
+
+const form = useForm({
+    message: '',
+    is_active: true,
+});
+
+const submit = () => {
+    form.post(route('admin.announcements.store'));
+};
+</script>
+
+<template>
+    <Head title="Create Announcement" />
+
+    <AdminLayout>
+        <Link :href="route('admin.announcements.index')" class="inline-flex items-center text-sm text-brand-cyan hover:text-blue-400 mb-6 group">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 mr-1 transform group-hover:-translate-x-1 transition-transform">
+                <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd" />
+            </svg>
+            Back to List
+        </Link>
+
+        <div class="max-w-2xl mx-auto">
+            <div class="bg-gray-800 rounded-lg shadow-lg p-6 border border-brand-border">
+                <h2 class="text-2xl font-bold mb-6 text-brand-cyan border-b border-gray-700 pb-2">Create Announcement</h2>
+                
+                <form @submit.prevent="submit" class="space-y-6">
+                    
+                    <div>
+                        <InputLabel for="message" value="Message" class="!text-brand-cyan !font-semibold" />
+                        <TextInput 
+                            id="message" 
+                            type="text" 
+                            class="mt-1 block w-full bg-gray-700 border-gray-600 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white placeholder-gray-400" 
+                            v-model="form.message" 
+                            required 
+                            autofocus 
+                            placeholder="e.g. Special Discount 50% Only Today!" 
+                        />
+                        <InputError class="mt-2" :message="form.errors.message" />
+                    </div>
+
+                    <div class="flex items-center p-4 bg-gray-700/50 rounded-lg border border-gray-600">
+                        <Checkbox 
+                            name="is_active" 
+                            v-model:checked="form.is_active" 
+                            class="text-brand-cyan focus:ring-brand-cyan bg-gray-700 border-gray-500"
+                        />
+                        <span class="ms-3 text-sm text-gray-300">
+                            Set as <strong>Active Announcement</strong> 
+                            <span class="text-gray-500 text-xs block mt-0.5">(This will automatically deactivate other announcements)</span>
+                        </span>
+                    </div>
+
+                    <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-700">
+                        <Link :href="route('admin.announcements.index')" class="text-gray-400 hover:text-white transition-colors text-sm">
+                            Cancel
+                        </Link>
+                        <PrimaryButton 
+                            class="!py-2.5 !px-6 bg-gradient-to-r from-brand-cyan to-brand-blue hover:from-brand-blue hover:to-brand-cyan focus:ring-offset-gray-800" 
+                            :class="{ 'opacity-25': form.processing }" 
+                            :disabled="form.processing"
+                        >
+                            Create Announcement
+                        </PrimaryButton>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </AdminLayout>
+</template>
