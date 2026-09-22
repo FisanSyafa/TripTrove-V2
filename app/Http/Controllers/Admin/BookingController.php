@@ -12,6 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BookingConfirmedMail;
+use App\Mail\BookingAvailabilityMail;
 
 class BookingController extends Controller
 {
@@ -128,11 +129,12 @@ class BookingController extends Controller
     public function update(Request $request, Booking $booking)
     {
         $validated = $request->validate([
-            'status' => 'required|in:pending,waiting_confirmation,paid,confirmed,cancelled,completed',
+            'status' => 'required|in:pending,available,not_available,waiting_confirmation,paid,confirmed,cancelled,completed',
             'assigned_driver_id' => 'nullable|exists:users,id',
             'assigned_guide_id' => 'nullable|exists:users,id',
             'assigned_vehicle_id' => 'nullable|exists:vehicles,id',
         ]);
+// ... [rest of the update method remains similar, just showing the status change]
 
         // [BARU] 1. Simpan status lama sebelum di-update
         // Ini penting untuk memastikan counter tidak bertambah berkali-kali jika admin menekan simpan ulang.
@@ -219,5 +221,27 @@ class BookingController extends Controller
 
         return redirect()->route('admin.bookings.show', $booking->id)
                          ->with('message', 'Booking berhasil diperbarui.');
+    }
+
+    /**
+     * Kirim email ketersediaan kustom.
+     */
+    public function notifyEmail(Request $request, Booking $booking)
+    {
+        $validated = $request->validate([
+            'message' => 'required|string',
+            'subject' => 'nullable|string|max:255',
+            'button_text' => 'nullable|string|max:100',
+        ]);
+
+        try {
+            $subject = $validated['subject'] ?? 'Booking Availability Update - TripTrove';
+            $buttonText = $validated['button_text'] ?? 'Lanjutkan ke Pembayaran';
+            Mail::to($booking->contact_email)->send(new BookingAvailabilityMail($booking, $validated['message'], $subject, $buttonText));
+            return back()->with('message', 'Email notifikasi berhasil dikirim.');
+        } catch (\Exception $e) {
+            \Log::error('Failed to send availability email: ' . $e->getMessage());
+            return back()->with('error', 'Gagal mengirim email: ' . $e->getMessage());
+        }
     }
 }

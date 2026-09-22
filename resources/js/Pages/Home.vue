@@ -261,7 +261,7 @@ const features = ref([
                                             </p>
                                             <div class="flex items-center justify-between border-t border-white/20 pt-4">
                                                 <div>
-                                                    <span class="text-xs text-gray-400 block">Starting from</span>
+                                                    <span class="text-[10px] md:text-xs text-gray-400 block">{{ __('From') }}</span>
                                                     <span class="text-xl font-bold text-brand-cyan">{{ $formatCurrency(pkg.price * (1 - (pkg.discount_percent / 100))) }}</span>
                                                 </div>
                                                 <Link :href="route('packages.show', pkg.slug)" class="w-10 h-10 rounded-full bg-white text-gray-900 flex items-center justify-center hover:bg-brand-cyan transition-colors">
@@ -343,6 +343,7 @@ const features = ref([
                             <div class="mt-auto text-right border-t border-gray-100/70 pt-2 md:pt-3">
                                 <div v-if="pkg.discount_percent > 0" class="text-[10px] md:text-xs text-gray-400 line-through font-medium">{{ $formatCurrency(pkg.price) }}</div>
                                 <div class="flex justify-end items-baseline flex-wrap">
+                                    <span class="text-[10px] md:text-xs text-brand-blue font-bold mr-1">{{ __('From') }}</span>
                                     <span class="text-sm md:text-lg font-extrabold text-brand-blue">{{ $formatCurrency(pkg.price * (1 - (pkg.discount_percent / 100))) }}</span>
                                     <span class="text-[10px] md:text-xs text-gray-500 font-medium ml-1">/{{ __('pax') }}</span>
                                 </div>

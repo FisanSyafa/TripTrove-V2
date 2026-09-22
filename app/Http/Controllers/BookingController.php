@@ -26,7 +26,11 @@ class BookingController extends Controller
         }
 
         return Inertia::render('Booking/Create', [
-            'package' => $package
+            'package' => $package,
+            'car_prices' => [
+                'small' => (float) $package->small_car_price,
+                'large' => (float) $package->large_car_price,
+            ]
         ]);
     }
 
@@ -63,8 +67,54 @@ class BookingController extends Controller
 
         $basePrice = $package->price;
         $discountPercent = $package->discount_percent;
-        $pricePerPersonAfterDiscount = $basePrice - ($basePrice * $discountPercent / 100);
-        $totalPrice = $pricePerPersonAfterDiscount * $numParticipants;
+        
+        // Base package total price without discount
+        $packageTotalPriceWithoutDiscount = ($basePrice * $numAdults) + ($basePrice * 0.5 * $numChildren);
+
+        // Car Pricing Logic
+        $smallCarPrice = (float) $package->small_car_price;
+        $largeCarPrice = (float) $package->large_car_price;
+        
+        if ($numParticipants <= 4) {
+            $carType = 'small';
+            $carPrice = $smallCarPrice;
+        } else {
+            $carType = 'large';
+            $carPrice = $largeCarPrice;
+        }
+
+        // Group Ticket Pricing Logic (Supports multiple group tickets)
+        $bookingGroupTickets = [];
+        $groupTicketTotal = 0;
+
+        if (!empty($package->group_tickets) && is_array($package->group_tickets)) {
+            foreach ($package->group_tickets as $gt) {
+                $gtPrice = (float) ($gt['price'] ?? 0);
+                $gtMax = (int) ($gt['max_persons'] ?? 0);
+                $gtName = $gt['name'] ?? 'Group Ticket';
+
+                if ($gtPrice > 0 && $gtMax > 0) {
+                    $count = (int) ceil($numParticipants / $gtMax);
+                    $total = $count * $gtPrice;
+                    $groupTicketTotal += $total;
+
+                    $bookingGroupTickets[] = [
+                        'name' => $gtName,
+                        'price' => $gtPrice,
+                        'max_persons' => $gtMax,
+                        'count' => $count,
+                        'total' => $total,
+                    ];
+                }
+            }
+        }
+
+        // Sum the package total price, car price, and group ticket price
+        $subtotalBeforeDiscount = $packageTotalPriceWithoutDiscount + $carPrice + $groupTicketTotal;
+
+        // Apply discount to the sum
+        $discountAmount = $subtotalBeforeDiscount * ($discountPercent / 100);
+        $totalPrice = $subtotalBeforeDiscount - $discountAmount;
 
         $departureDate = Carbon::parse($validatedData['departure_date']);
         $endDate = $departureDate->copy()->addDays($package->duration_days - 1); 
@@ -90,6 +140,10 @@ class BookingController extends Controller
 
                 'package_price_at_booking' => $basePrice,
                 'discount_at_booking' => $discountPercent,
+                'car_type' => $carType,
+                'car_price' => $carPrice,
+                'group_tickets' => $bookingGroupTickets,
+                'group_ticket_total' => $groupTicketTotal,
                 'total_price' => $totalPrice,
                 'status' => 'pending',
                 'special_requests' => $validatedData['special_requests'] ?? null,
@@ -111,6 +165,10 @@ class BookingController extends Controller
             } catch (\Exception $mailError) {
                 \Log::error('Failed to send booking email: ' . $mailError->getMessage());
                 // Continue anyway, email is not critical
+            }
+
+            if (Auth::check()) {
+                return redirect()->route('dashboard')->with('message', 'Booking Anda berhasil!');
             }
 
             return redirect()->route('payment.create', $booking->id)->with('message', 'Booking Anda berhasil! Silakan lanjutkan pembayaran.');
@@ -149,17 +207,17 @@ class BookingController extends Controller
     }
 
     /**
-     * Handle Pay on Arrival - Update status dan return WhatsApp URL
+     * Handle Pay on Arrival - Update status and return success
      */
     public function payOnArrival(Booking $booking)
     {
-        // Pastikan user bisa akses booking miliknya sendiri (logged in or guest via session)
+        // Pastikan user bisa akses booking miliknya sendiri
         if (Auth::check() && $booking->user_id !== null && (int) $booking->user_id !== (int) auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
-        // Pastikan booking masih pending
-        if ($booking->status !== 'pending') {
+        // Pastikan booking masih pending atau available (karena available baru bisa bayar)
+        if (!in_array($booking->status, ['pending', 'available'])) {
             return response()->json(['error' => 'Booking sudah diproses'], 400);
         }
 
@@ -168,45 +226,33 @@ class BookingController extends Controller
             'status' => 'waiting_confirmation'
         ]);
 
-        // Increment sold_count
+        // Increment sold_count jika belum pernah dihitung
         $booking->tourPackage->increment('sold_count');
 
-        // Kirim email notifikasi
-        $booking->load(['user', 'tourPackage']);
-        \Mail::to($booking->contact_email)->send(new \App\Mail\PaymentSuccessMail($booking));
-
-        // Prepare WhatsApp message with detailed info
-        $adminPhone = config('app.admin_whatsapp_number');
-        
-        $participantLabel = __('Adult');
-        $childrenLabel = __('Children');
-        
-        $participantText = $booking->num_adults . ' ' . $participantLabel;
-        if ($booking->num_children > 0) {
-            $participantText .= ' & ' . $booking->num_children . ' ' . $childrenLabel;
-        }
-
-        $pickupTime = $booking->tourPackage->pickup_time ?? '-';
-
-        $message = "*" . __('Booking Confirmation - Pay on Arrival') . "*\n\n";
-        $message .= __('Halo TripTrove,') . "\n\n";
-        $message .= __('I want to confirm a booking with the following details:') . "\n\n";
-        $message .= "📋 *" . __('Booking Code') . ":* {$booking->booking_code}\n";
-        $message .= "🎫 *" . __('Package') . ":* {$booking->tourPackage->name}\n";
-        $message .= "📍 *" . __('Destination') . ":* {$booking->tourPackage->destination_summary}\n";
-        $message .= "📅 *" . __('Departure Date') . ":* " . \Carbon\Carbon::parse($booking->departure_date)->format('d F Y') . "\n";
-        $message .= "⏰ *" . __('Pickup Time') . ":* {$pickupTime}\n";
-        $message .= "👥 *" . __('Participants') . ":* {$participantText}\n";
-        $message .= "💰 *" . __('Total Price') . ":* Rp " . number_format($booking->total_price, 0, ',', '.') . "\n\n";
-        $message .= "💳 *" . __('Payment Method') . ":* " . __('Pay on Arrival') . " (" . __('Pay when we meet') . ")\n\n";
-        $message .= __('Please confirm my booking. Thank you!') . " 🙏";
-
-        $waUrl = 'https://wa.me/' . $adminPhone . '?text=' . urlencode($message);
-
-        // Return JSON dengan WhatsApp URL
         return response()->json([
             'success' => true,
-            'whatsapp_url' => $waUrl
+            'message' => 'Payment status updated to waiting confirmation.'
+        ]);
+    }
+
+    /**
+     * Handle availability request from user
+     */
+    public function requestAvailability(Booking $booking)
+    {
+        // Pastikan user bisa akses
+        if (Auth::check() && $booking->user_id !== null && (int) $booking->user_id !== (int) auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        // Simpan waktu permintaan ketersediaan
+        $booking->update([
+            'availability_requested_at' => now()
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Availability request sent!'
         ]);
     }
 }

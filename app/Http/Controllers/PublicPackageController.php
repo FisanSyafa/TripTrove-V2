@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\TourPackage;
 use App\Models\Announcement;
+use App\Models\Review;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
+use App\Services\CurrencyService;
 
 class PublicPackageController extends Controller
 {
@@ -56,6 +58,21 @@ class PublicPackageController extends Controller
             'includes_guide' => 'nullable|boolean',
         ]);
 
+        $currency = session('currency', 'IDR');
+        $currencyService = new CurrencyService();
+
+        $minPriceInput = $request->input('min_price');
+        $maxPriceInput = $request->input('max_price');
+
+        // Konversi filter harga ke IDR (base currency) sebelum query
+        $minPriceIdr = ($minPriceInput && $currency !== 'IDR') 
+            ? $currencyService->convertToBase($minPriceInput, $currency) 
+            : $minPriceInput;
+
+        $maxPriceIdr = ($maxPriceInput && $currency !== 'IDR') 
+            ? $currencyService->convertToBase($maxPriceInput, $currency) 
+            : $maxPriceInput;
+
         $packages = TourPackage::query()
             ->where('status', 'published')
             ->with('reviews')
@@ -69,11 +86,11 @@ class PublicPackageController extends Controller
             ->when($request->input('category'), function ($query, $category) {
                 $query->where('category', $category);
             })
-            ->when($request->input('min_price'), function ($query, $min_price) {
-                $query->whereRaw('(price * (1 - COALESCE(discount_percent, 0) / 100)) >= ?', [$min_price]);
+            ->when($minPriceIdr, function ($query, $minPrice) {
+                $query->whereRaw('(price * (1 - COALESCE(discount_percent, 0) / 100)) >= ?', [$minPrice]);
             })
-            ->when($request->input('max_price'), function ($query, $max_price) {
-                $query->whereRaw('(price * (1 - COALESCE(discount_percent, 0) / 100)) <= ?', [$max_price]);
+            ->when($maxPriceIdr, function ($query, $maxPrice) {
+                $query->whereRaw('(price * (1 - COALESCE(discount_percent, 0) / 100)) <= ?', [$maxPrice]);
             })
             ->when($request->input('duration'), function ($query, $duration) {
                 if ($duration === '1-3') {
@@ -135,5 +152,44 @@ class PublicPackageController extends Controller
             'package' => $package,
             'adminWhatsappNumber' => config('app.admin_whatsapp_number')
         ]);
+    }
+
+    public function review(TourPackage $package)
+    {
+        if ($package->status !== 'published') {
+            abort(404);
+        }
+
+        return Inertia::render('Package/Review', [
+            'package' => $package
+        ]);
+    }
+
+    public function storeReview(Request $request, TourPackage $package)
+    {
+        if ($package->status !== 'published') {
+            abort(404);
+        }
+
+        $validated = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'comment' => 'nullable|string|max:5000',
+            'guest_name' => 'nullable|string|max:255',
+            'guest_country' => 'nullable|string|max:255',
+        ]);
+
+        Review::create([
+            'tour_package_id' => $package->id,
+            'user_id' => auth()->id(), // null if guest
+            'guest_name' => auth()->check() ? auth()->user()->name : ($validated['guest_name'] ?? 'Guest'),
+            'guest_country' => $validated['guest_country'] ?? null,
+            'rating' => $validated['rating'],
+            'comment' => $validated['comment'],
+            'review_date' => now(),
+            'is_approved' => false,
+        ]);
+
+        return redirect()->route('packages.show', $package->slug)
+            ->with('message', 'Terima kasih! Ulasan Anda telah terkirim dan menunggu moderasi.');
     }
 }

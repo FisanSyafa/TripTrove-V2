@@ -31,6 +31,7 @@ use App\Http\Controllers\Admin\MessageController;
 use App\Http\Controllers\Auth\GoogleAuthController;
 
 use App\Http\Controllers\Admin\AnnouncementController;
+use App\Http\Controllers\Admin\TripSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -98,6 +99,8 @@ Route::post('bookings/{booking}/payment', [PaymentController::class, 'store'])->
 Route::match(['get', 'post'], 'bookings/{booking}/payment/success', [PaymentController::class, 'handleSuccess'])->name('payment.success');
 Route::get('bookings/{booking}/payment-success', [PaymentController::class, 'success'])->name('payment.success.page');
 Route::post('bookings/{booking}/pay-on-arrival', [BookingController::class, 'payOnArrival'])->name('booking.pay-on-arrival');
+Route::post('bookings/{booking}/request-availability', [BookingController::class, 'requestAvailability'])->name('booking.request-availability');
+
 
 // BARU: Halaman Semua Paket (dengan filter)
 Route::get('/packages', [PublicPackageController::class, 'allPackages'])->name('packages.all');
@@ -108,6 +111,10 @@ Route::post('/dream-tour', [DreamTourController::class, 'store'])->name('dream-t
 
 // Halaman Detail Paket
 Route::get('/paket/{package:slug}', [PublicPackageController::class, 'show'])->name('packages.show');
+
+// Public Review Paket
+Route::get('/packages/{package:slug}/review', [PublicPackageController::class, 'review'])->name('packages.review');
+Route::post('/packages/{package}/review', [PublicPackageController::class, 'storeReview'])->name('packages.review.store');
 
 // == Rute Autentikasi ==
 // Rute login, register, forgot password, dll. disertakan dari file auth.php
@@ -160,6 +167,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('bookings', [AdminBookingController::class, 'index'])->name('bookings.index');
     Route::get('bookings/{booking}', [AdminBookingController::class, 'show'])->name('bookings.show');
     Route::put('bookings/{booking}', [AdminBookingController::class, 'update'])->name('bookings.update');
+    Route::post('bookings/{booking}/notify-email', [AdminBookingController::class, 'notifyEmail'])->name('bookings.notify-email');
 
     Route::resource('vehicle-types', VehicleTypeController::class);
     Route::resource('vehicles', VehicleController::class);
@@ -184,10 +192,16 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
     Route::get('dream-tour-requests', [\App\Http\Controllers\Admin\DreamTourRequestController::class, 'index'])->name('dream-tour-requests.index');
     Route::get('dream-tour-requests/{dreamTourRequest}', [\App\Http\Controllers\Admin\DreamTourRequestController::class, 'show'])->name('dream-tour-requests.show');
     Route::put('dream-tour-requests/{dreamTourRequest}', [\App\Http\Controllers\Admin\DreamTourRequestController::class, 'update'])->name('dream-tour-requests.update');
+    Route::post('dream-tour-requests/{dreamTourRequest}/notify-email', [\App\Http\Controllers\Admin\DreamTourRequestController::class, 'notifyEmail'])->name('dream-tour-requests.notify-email');
+    Route::delete('dream-tour-requests/{dreamTourRequest}', [\App\Http\Controllers\Admin\DreamTourRequestController::class, 'destroy'])->name('dream-tour-requests.destroy');
 
     // Export Routes
     Route::get('export/revenue', [AdminDashboardController::class, 'exportRevenueCsv'])->name('export.revenue');
     Route::get('export/packages', [AdminDashboardController::class, 'exportPackagesCsv'])->name('export.packages');
     Route::get('export/bookings', [AdminDashboardController::class, 'exportBookingsCsv'])->name('export.bookings');
+
+    // Trip Settings
+    Route::get('trip-settings', [TripSettingController::class, 'index'])->name('trip-settings.index');
+    Route::post('trip-settings', [TripSettingController::class, 'update'])->name('trip-settings.update');
 
 });

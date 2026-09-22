@@ -324,19 +324,52 @@
         <div class="total-section">
             @php
                 $pricePerPerson = $booking->package_price_at_booking;
-                $subtotal = $pricePerPerson * $booking->num_participants;
-                $discountAmount = $subtotal * ($booking->discount_at_booking / 100);
+                $numAdults = $booking->num_adults;
+                $numChildren = $booking->num_children;
+                
+                // Package Subtotal (including child discount)
+                $packageSubtotal = ($pricePerPerson * $numAdults) + ($pricePerPerson * 0.5 * $numChildren);
+                $discountAmount = $packageSubtotal * ($booking->discount_at_booking / 100);
             @endphp
             
             <div class="total-row">
-                <div class="total-label">{{ __('Subtotal') }}:</div>
-                <div class="total-value">Rp {{ number_format($subtotal, 0, ',', '.') }}</div>
+                <div class="total-label">{{ __('Package Subtotal') }}:</div>
+                <div class="total-value">Rp {{ number_format($packageSubtotal, 0, ',', '.') }}</div>
             </div>
             
             @if($booking->discount_at_booking > 0)
             <div class="total-row">
                 <div class="total-label">{{ __('Discount') }} ({{ $booking->discount_at_booking }}%):</div>
                 <div class="total-value" style="color: #dc3545;">- Rp {{ number_format($discountAmount, 0, ',', '.') }}</div>
+            </div>
+            @endif
+
+            @if($booking->car_price > 0)
+            <div class="total-row">
+                <div class="total-label">
+                    {{ __('Transportation') }} 
+                    ({{ $booking->car_type === 'small' ? __('Small Car') : __('Large Car') }}):
+                </div>
+                <div class="total-value">Rp {{ number_format($booking->car_price, 0, ',', '.') }}</div>
+            </div>
+            @endif
+
+            @if(!empty($booking->group_tickets) && is_array($booking->group_tickets))
+                @foreach($booking->group_tickets as $gt)
+                <div class="total-row">
+                    <div class="total-label">
+                        {{ $gt['name'] ?? __('Group Ticket') }} 
+                        ({{ $gt['count'] }} {{ __('Ticket(s)') }}):
+                    </div>
+                    <div class="total-value">Rp {{ number_format($gt['total'], 0, ',', '.') }}</div>
+                </div>
+                @endforeach
+            @elseif(($booking->group_ticket_total ?? 0) > 0)
+            <div class="total-row">
+                <div class="total-label">
+                    {{ __('Group Ticket') }}:
+                </div>
+                <div class="total-value">Rp {{ number_format($booking->group_ticket_total, 0, ',', '.') }}</div>
             </div>
             @endif
             

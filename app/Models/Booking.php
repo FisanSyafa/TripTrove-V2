@@ -24,6 +24,10 @@ class Booking extends Model
         'country',
         'package_price_at_booking',
         'discount_at_booking',
+        'car_type',
+        'car_price',
+        'group_tickets',
+        'group_ticket_total',
         'total_price',
         'status',
         'special_requests',
@@ -34,6 +38,13 @@ class Booking extends Model
         'snap_token',
         'end_date',
         'locale',
+    ];
+
+    protected $casts = [
+        'group_tickets' => 'array',
+        'group_ticket_total' => 'decimal:2',
+        'car_price' => 'decimal:2',
+        'total_price' => 'decimal:2',
     ];
 
     // Relasi ke User (Pemesan)

@@ -449,11 +449,12 @@ const storageUrl = (path) => {
                                         {{ $formatCurrency(pkg.price) }}
                                     </div>
                                     <div class="flex justify-end items-baseline flex-wrap">
+                                        <span class="text-[10px] md:text-xs text-brand-blue font-bold mr-1">{{ __('From') }}</span>
                                         <span class="text-sm md:text-lg font-extrabold text-brand-blue">
                                             {{ $formatCurrency(pkg.price * (1 - (pkg.discount_percent / 100))) }}
                                         </span>
                                         <span class="text-[10px] md:text-xs text-gray-500 font-medium ml-1">
-                                            /{{ __('person') }}
+                                            /{{ __('pax') }}
                                         </span>
                                     </div>
                                 </div>

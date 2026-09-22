@@ -16,17 +16,19 @@ createInertiaApp({
             .use(plugin)
             .use(ZiggyVue);
 
-        app.config.globalProperties.__ = (key) => {
+        const translate = (key) => {
             const page = app.config.globalProperties.$page;
             const translations = page.props.translations || {};
             return translations[key] || key;
         };
 
-        app.config.globalProperties.$formatCurrency = (value) => {
+        app.config.globalProperties.__ = translate;
+        window.__ = translate;
+
+        const formatCurrency = (value) => {
             const page = app.config.globalProperties.$page;
             
             const selectedCurrency = page.props.currency || 'IDR';
-            
             const rates = page.props.currencyRates || {}; 
 
             let rate = 1; 
@@ -38,9 +40,7 @@ createInertiaApp({
             }
 
             const numericValue = Number(value);
-            if (isNaN(numericValue)) {
-                return value;
-            }
+            if (isNaN(numericValue)) return value;
 
             const convertedValue = numericValue * rate;
 
@@ -55,6 +55,9 @@ createInertiaApp({
                 maximumFractionDigits: fractionDigits
             }).format(convertedValue);
         };
+
+        app.config.globalProperties.$formatCurrency = formatCurrency;
+        window.$formatCurrency = formatCurrency;
 
         app.mount(el);
     },

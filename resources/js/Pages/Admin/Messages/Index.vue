@@ -26,7 +26,7 @@ const closeDetail = () => {
 };
 
 const deleteMessage = (id) => {
-    if (confirm('Apakah Anda yakin ingin menghapus pesan ini?')) {
+    if (confirm(__('Are you sure you want to delete this message?'))) {
         form.delete(route('admin.messages.destroy', id), {
             preserveScroll: true,
             onSuccess: () => closeDetail(), // Tutup modal jika menghapus dari dalam modal

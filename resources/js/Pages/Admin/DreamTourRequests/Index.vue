@@ -37,6 +37,14 @@ const formatDate = (date) => {
         day: 'numeric' 
     });
 };
+
+const deleteRequest = (id) => {
+    if (confirm(__('Are you sure you want to delete this dream tour request?'))) {
+        router.delete(route('admin.dream-tour-requests.destroy', id), {
+            preserveScroll: true,
+        });
+    }
+};
 </script>
 
 <template>
@@ -64,7 +72,7 @@ const formatDate = (date) => {
                 <thead class="bg-[#0c1222]/80 border-b border-gray-600/50 text-xs uppercase tracking-wider text-gray-400">
                     <tr>
                         <th class="p-4">{{ __('Customer') }}</th>
-                        <th class="p-4">{{ __('Email') }}</th>
+                        <th class="p-4">{{ __('Phone Number') }}</th>
                         <th class="p-4">{{ __('Requested Destinations') }}</th>
                         <th class="p-4">{{ __('Participants') }}</th>
                         <th class="p-4">{{ __('Requested Date') }}</th>
@@ -83,8 +91,13 @@ const formatDate = (date) => {
                         :key="request.id" 
                         class="border-b border-gray-700 hover:bg-gray-700/30 transition-colors duration-150"
                     >
-                        <td class="p-4 font-medium text-white">{{ request.name }}</td>
-                        <td class="p-4 text-gray-400">{{ request.email }}</td>
+                        <td class="p-4">
+                            <div class="font-medium text-white">{{ request.name }}</div>
+                            <div class="text-xs text-gray-400">{{ request.email }}</div>
+                        </td>
+                        <td class="p-4 text-gray-400">
+                            <span v-if="request.country_code">{{ request.country_code }}</span> {{ request.phone }}
+                        </td>
                         <td class="p-4">
                             <div class="flex flex-wrap gap-1">
                                 <span 
@@ -116,16 +129,26 @@ const formatDate = (date) => {
                             </span>
                         </td>
                         <td class="p-4 text-right">
-                            <Link 
-                                :href="route('admin.dream-tour-requests.show', request.id)"
-                                class="inline-flex items-center gap-2 px-4 py-2 bg-brand-blue/20 text-brand-cyan rounded-lg hover:bg-brand-blue/30 transition-colors border border-brand-blue/30 text-sm font-medium"
-                            >
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                </svg>
-                                {{ __('View Details') }}
-                            </Link>
+                            <div class="flex items-center justify-end gap-2">
+                                <Link 
+                                    :href="route('admin.dream-tour-requests.show', request.id)"
+                                    class="inline-flex items-center gap-2 px-3 py-2 bg-brand-blue/20 text-brand-cyan rounded-lg hover:bg-brand-blue/30 transition-colors border border-brand-blue/30 text-sm font-medium"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    </svg>
+                                </Link>
+                                <button 
+                                    @click="deleteRequest(request.id)"
+                                    class="inline-flex items-center gap-2 px-3 py-2 bg-red-500/20 text-red-500 rounded-lg hover:bg-red-500/30 transition-colors border border-red-500/30 text-sm font-medium"
+                                    :title="__('Delete Request')"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                 </tbody>

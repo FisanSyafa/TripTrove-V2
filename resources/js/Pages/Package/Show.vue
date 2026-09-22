@@ -102,6 +102,14 @@ const openWhatsApp = () => {
     const text = __("Hi TripTrove! I have a question about") + ` ${props.package.name}`;
     window.open(`https://wa.me/${adminWANumber}?text=${encodeURIComponent(text)}`, '_blank');
 };
+
+const getReviewerName = (review) => {
+    return review.guest_name || (review.user && review.user.name) || 'Anonymous';
+};
+
+const getReviewerCountry = (review) => {
+    return review.guest_country || '';
+};
 </script>
 
 <template>
@@ -185,10 +193,11 @@ const openWhatsApp = () => {
                                     {{ $formatCurrency(package.price) }}
                                 </p>
                                 <div class="flex items-baseline">
+                                    <span class="text-xs sm:text-sm text-brand-blue font-bold mr-1">{{ __('From') }}</span>
                                     <p class="text-3xl sm:text-4xl font-extrabold text-brand-blue">
                                         {{ $formatCurrency(package.price * (1 - (package.discount_percent / 100))) }}
                                     </p>
-                                    <p class="text-xs sm:text-sm text-gray-500 ml-2 font-medium">/ {{ __('person') }}</p>
+                                    <p class="text-xs sm:text-sm text-gray-500 ml-2 font-medium">/ {{ __('pax') }}</p>
                                 </div>
                             </div>
 
@@ -210,6 +219,13 @@ const openWhatsApp = () => {
                             >
                                 {{ __('Book Now') }}
                             </button>
+                            
+                            <Link 
+                                :href="route('dream-tour.create')"
+                                class="mt-3 block w-full text-center px-6 py-4 bg-white border-2 border-brand-blue text-brand-blue text-lg font-bold rounded-xl shadow-sm hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1"
+                            >
+                                {{ __('Request Custom Tour') }}
+                            </Link>
                             
                             <p class="text-center text-xs text-gray-400 mt-4">
                                 *{{ __('Terms & Conditions apply') }}
@@ -243,8 +259,19 @@ const openWhatsApp = () => {
                                 <li v-if="package.includes_driver_vehicle" class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
                                     <span class="text-green-500 text-xl">✓</span> <span>{{ __('Transportation (Driver & Vehicle)') }}</span>
                                 </li>
+                                <li v-if="package.includes_about_this_trip" class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                                    <span class="text-green-500 text-xl">✓</span> <span>{{ __('As stated in About this trip') }}</span>
+                                </li>
                             </ul>
-                            <p v-if="!package.includes_hotel && !package.includes_guide && !package.includes_entrance_fee && !package.includes_driver_vehicle" class="text-gray-500 italic mt-2">
+                            <div v-if="package.group_tickets && package.group_tickets.length > 0" class="mt-4 space-y-2">
+                                <div v-for="(gt, idx) in package.group_tickets" :key="idx" class="p-3 bg-blue-50/70 border border-blue-100 rounded-lg text-sm text-blue-900 flex items-center gap-2">
+                                    <span class="text-lg">🎫</span>
+                                    <span>
+                                        <strong>{{ gt.name || __('Group Ticket') }}:</strong> {{ $formatCurrency(gt.price) }} / {{ __('ticket') }} ({{ __('Max') }} {{ gt.max_persons }} {{ __('pax/ticket') }})
+                                    </span>
+                                </div>
+                            </div>
+                            <p v-if="!package.includes_hotel && !package.includes_guide && !package.includes_entrance_fee && !package.includes_driver_vehicle && !package.includes_about_this_trip" class="text-gray-500 italic mt-2">
                                 {{ __('Contact us for facility details.') }}
                             </p>
                         </div>
@@ -269,13 +296,16 @@ const openWhatsApp = () => {
                             <div v-if="package.reviews.length > 0" class="space-y-4">
                                 <div v-for="review in displayedReviews" :key="review.id" class="bg-white p-4 sm:p-6 rounded-xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
                                     <div class="flex gap-3 sm:gap-4">
-                                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-brand-cyan to-brand-blue text-white flex-shrink-0 flex items-center justify-center font-bold text-lg sm:text-xl shadow-md">
-                                            {{ review.user.name.charAt(0) }}
+                                        <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-br from-brand-cyan to-brand-blue text-white flex-shrink-0 flex items-center justify-center font-bold text-lg sm:text-xl shadow-md uppercase">
+                                            {{ getReviewerName(review).charAt(0) }}
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex justify-between items-start mb-2">
                                                 <div>
-                                                    <h4 class="font-bold text-gray-900 text-base sm:text-lg">{{ review.user.name }}</h4>
+                                                    <h4 class="font-bold text-gray-900 text-base sm:text-lg">
+                                                        {{ getReviewerName(review) }}
+                                                        <span v-if="getReviewerCountry(review)" class="text-gray-500 font-normal text-sm sm:text-base"> - {{ getReviewerCountry(review) }}</span>
+                                                    </h4>
                                                     <p class="text-xs text-gray-500">{{ new Date(review.review_date).toLocaleDateString('id-ID', { year: 'numeric', month: 'long', day: 'numeric'}) }}</p>
                                                 </div>
                                                 <div class="flex items-center">
@@ -333,10 +363,11 @@ const openWhatsApp = () => {
                                     {{ $formatCurrency(package.price) }}
                                 </p>
                                 <div class="flex items-baseline">
+                                    <span class="text-xs sm:text-sm text-brand-blue font-bold mr-1">{{ __('From') }}</span>
                                     <p class="text-3xl sm:text-4xl font-extrabold text-brand-blue">
                                         {{ $formatCurrency(package.price * (1 - (package.discount_percent / 100))) }}
                                     </p>
-                                    <p class="text-xs sm:text-sm text-gray-500 ml-2 font-medium">/ {{ __('person') }}</p>
+                                    <p class="text-xs sm:text-sm text-gray-500 ml-2 font-medium">/ {{ __('pax') }}</p>
                                 </div>
                             </div>
 
@@ -358,6 +389,13 @@ const openWhatsApp = () => {
                             >
                                 {{ __('Book Now') }}
                             </button>
+
+                            <Link 
+                                :href="route('dream-tour.create')"
+                                class="mt-3 block w-full text-center px-6 py-4 bg-white border-2 border-brand-blue text-brand-blue text-lg font-bold rounded-xl shadow-sm hover:bg-blue-50 transition-all duration-300 transform hover:-translate-y-1"
+                            >
+                                {{ __('Request Custom Tour') }}
+                            </Link>
                             
                             <p class="text-center text-xs text-gray-400 mt-4">
                                 *{{ __('Terms & Conditions apply') }}

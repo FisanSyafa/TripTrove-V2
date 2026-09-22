@@ -45,6 +45,7 @@ watch(search, throttle(function (value) {
                     <tr>
                         <th class="p-4">Kode Booking</th>
                         <th class="p-4">Pelanggan</th>
+                        <th class="p-4">WhatsApp / Telp</th>
                         <th class="p-4">Paket</th>
                         <th class="p-4">Tgl Berangkat</th>
                         <th class="p-4">Status</th>
@@ -58,6 +59,10 @@ watch(search, throttle(function (value) {
                     <tr v-for="booking in bookings.data" :key="booking.id" class="border-b border-gray-700 hover:bg-gray-700/30 transition-colors duration-150">
                         <td class="p-4 font-mono text-white">{{ booking.booking_code }}</td>
                         <td class="p-4">{{ booking.user ? booking.user.name : booking.guest_name }}</td>
+                        <td class="p-4 text-gray-400">
+                             <span v-if="booking.country_code">{{ booking.country_code }}</span> 
+                             {{ booking.contact_phone }}
+                        </td>
                         <td class="p-4">{{ booking.tour_package.name }}</td>
                         <td class="p-4">{{ booking.departure_date }}</td>
                         <td class="p-4">

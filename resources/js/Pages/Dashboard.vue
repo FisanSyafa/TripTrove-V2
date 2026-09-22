@@ -1,11 +1,13 @@
 <script setup>
 import MainLayout from '@/Layouts/MainLayout.vue';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import Pagination from '@/Components/Pagination.vue';
-import { computed, getCurrentInstance } from 'vue';
+import { computed, getCurrentInstance, ref } from 'vue';
+import Modal from '@/Components/Modal.vue';
 
-defineProps({
+const props = defineProps({
     bookings: Object, 
+    adminWhatsappNumber: String,
 });
 
 // --- Helper Global ---
@@ -32,6 +34,8 @@ const formatDate = (dateString) => {
 const getStatusClass = (status) => {
     switch (status) {
         case 'pending': return 'bg-orange-100 text-orange-700 border border-orange-200';
+        case 'available': return 'bg-brand-cyan/20 text-brand-blue border border-brand-cyan/30';
+        case 'not_available': return 'bg-red-100 text-red-700 border border-red-200';
         case 'waiting_confirmation': return 'bg-blue-100 text-blue-700 border border-blue-200';
         case 'confirmed': return 'bg-green-100 text-green-700 border border-green-200';
         case 'cancelled': return 'bg-red-100 text-red-700 border border-red-200';
@@ -46,38 +50,83 @@ const translateStatus = (status) => {
     return __(capitalized); 
 }
 
-// Handle Pay on Arrival - POST request then redirect to WhatsApp
-const handlePayOnArrival = async (bookingId) => {
-    try {
-        // Get CSRF token from page props
-        const csrfToken = page.value.props.csrf_token || document.querySelector('meta[name="csrf-token"]')?.content;
-        
-        // Make POST request to backend
-        const response = await fetch(route('booking.pay-on-arrival', bookingId), {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRF-TOKEN': csrfToken,
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-            },
-            credentials: 'same-origin',
-        });
+const showSuccessModal = ref(false);
+const modalMessage = ref('');
+const modalTitle = ref('');
+const modalType = ref('success'); // 'success' | 'availability'
+const isCheckingAvailability = ref(false);
+const selectedBooking = ref(null);
 
-        if (response.ok) {
-            const data = await response.json();
-            // Redirect to WhatsApp URL
-            if (data.whatsapp_url) {
-                window.location.href = data.whatsapp_url;
-            }
-        } else {
-            const errorData = await response.json();
-            alert(errorData.error || __('An error occurred. Please try again.'));
-        }
-    } catch (error) {
-        console.error('Error:', error);
-        alert(__('An error occurred. Please try again.'));
+// Participant display helper
+const getParticipantDisplay = (booking) => {
+    const adults = booking.num_adults || booking.num_participants || 1;
+    const children = booking.num_children || 0;
+    let text = adults + ' ' + __('Adult');
+    if (children > 0) {
+        text += ' & ' + children + ' ' + __('Children');
     }
+    return text;
+};
+
+const paymentWhatsappUrl = computed(() => {
+    if (!props.adminWhatsappNumber || !selectedBooking.value) return '#';
+    
+    const header = __('Payment Confirmation');
+    const intro = __('Hello TripTrove, I would like to pay for my booking:');
+    const labelCode = __('Booking Code');
+    const labelPackage = __('Package');
+    const labelDate = __('Departure Date');
+    const labelParticipants = __('Participants');
+    const labelAmount = __('Total Amount');
+    const footer = __('Please let me know the payment instructions. Thank you!');
+
+    const b = selectedBooking.value;
+    const dateStr = b.departure_date 
+        ? new Date(b.departure_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) 
+        : '-';
+
+    const message = `*${header}*\n\n${intro}\n- ${labelCode}: ${b.booking_code}\n- ${labelPackage}: ${b.tour_package?.name || '-'}\n- ${labelDate}: ${dateStr}\n- ${labelParticipants}: ${getParticipantDisplay(b)}\n- ${labelAmount}: ${$formatCurrency(b.total_price)}\n\n${footer}`;
+    
+    return `https://wa.me/${props.adminWhatsappNumber}?text=${encodeURIComponent(message)}`;
+});
+
+const getAvailabilityWhatsappUrl = (booking) => {
+    if (!props.adminWhatsappNumber) return '#';
+    
+    const header = __('Availability Check');
+    const intro = __('Hello TripTrove, I would like to check the availability for my booking:');
+    const labelCode = __('Booking Code');
+    const labelPackage = __('Package');
+    const labelDate = __('Departure Date');
+    const labelParticipants = __('Participants');
+    const footer = __('Please let me know if this date is available. Thank you!');
+
+    const dateStr = booking.departure_date 
+        ? new Date(booking.departure_date).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) 
+        : '-';
+
+    const message = `*${header}*\n\n${intro}\n- ${labelCode}: ${booking.booking_code}\n- ${labelPackage}: ${booking.tour_package?.name || '-'}\n- ${labelDate}: ${dateStr}\n- ${labelParticipants}: ${getParticipantDisplay(booking)}\n\n${footer}`;
+    
+    return `https://wa.me/${props.adminWhatsappNumber}?text=${encodeURIComponent(message)}`;
+};
+
+const checkAvailability = (booking) => {
+    // Notify backend and then open WA
+    axios.post(route('booking.request-availability', booking.id))
+        .finally(() => {
+            window.open(getAvailabilityWhatsappUrl(booking), '_blank');
+        });
+};
+
+const closeModal = () => {
+    showSuccessModal.value = false;
+    router.reload({ preserveScroll: true });
+};
+
+// Handle Pay Now (manual) - Only opens WhatsApp in a new tab
+const handlePayNowManual = (booking) => {
+    selectedBooking.value = booking;
+    window.open(paymentWhatsappUrl.value, '_blank');
 }
 </script>
 
@@ -192,25 +241,69 @@ const handlePayOnArrival = async (bookingId) => {
                                     <div class="text-lg font-extrabold text-brand-blue mt-2">
                                         {{ $formatCurrency(booking.total_price) }}
                                     </div>
+
+                                    <div class="mt-2 flex flex-wrap gap-2">
+                                        <div v-if="booking.car_type" class="flex items-center gap-2 text-xs text-brand-blue font-semibold bg-blue-50 w-fit px-2 py-1 rounded">
+                                            <span>🚗 {{ booking.car_type === 'small' ? __('Small Car') : __('Large Car') }}</span>
+                                            <span class="text-gray-400 font-normal">({{ $formatCurrency(booking.car_price) }})</span>
+                                        </div>
+                                        <template v-if="booking.group_tickets && booking.group_tickets.length > 0">
+                                            <div v-for="(gt, idx) in booking.group_tickets" :key="idx" class="flex items-center gap-2 text-xs text-purple-700 font-semibold bg-purple-50 w-fit px-2 py-1 rounded">
+                                                <span>🎫 {{ gt.name || __('Group Ticket') }} ({{ gt.count }}x)</span>
+                                                <span class="text-gray-400 font-normal">({{ $formatCurrency(gt.total) }})</span>
+                                            </div>
+                                        </template>
+                                        <div v-else-if="Number(booking.group_ticket_total) > 0" class="flex items-center gap-2 text-xs text-purple-700 font-semibold bg-purple-50 w-fit px-2 py-1 rounded">
+                                            <span>🎫 {{ __('Group Ticket') }}</span>
+                                            <span class="text-gray-400 font-normal">({{ $formatCurrency(booking.group_ticket_total) }})</span>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="flex flex-col items-start md:items-end space-y-3 min-w-[150px]">
-                                    <!-- Pending: Show Pay Now & Pay on Arrival -->
+                                    <!-- Pending: Show Checking Availability Message + Contact Button -->
                                     <template v-if="booking.status === 'pending'">
-                                        <Link 
-                                            :href="route('payment.create', booking.id)"
-                                            class="w-full text-center px-5 py-2 bg-gradient-to-r from-orange-400 to-orange-600 text-white rounded-lg shadow hover:from-orange-500 hover:to-orange-700 font-bold text-sm transform hover:-translate-y-0.5 transition-all"
+                                        <div class="bg-orange-50 p-4 rounded-lg border border-orange-100 w-full mb-2">
+                                            <p class="text-sm font-bold text-orange-800 mb-1 flex items-center">
+                                                <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-orange-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+                                                {{ __('Checking availability...') }}
+                                            </p>
+                                            <p class="text-xs text-orange-700">
+                                                {{ __('We are checking the availability for this tour package on your selected date.') }}
+                                            </p>
+                                        </div>
+                                        <button 
+                                            @click="checkAvailability(booking)"
+                                            class="w-full text-center px-4 py-2 bg-orange-500 text-white rounded-lg shadow hover:bg-orange-600 font-bold text-xs transition-all flex items-center justify-center gap-2"
                                         >
-                                            {{ __('Pay Now') }}
-                                        </Link>
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                                            </svg>
+                                            {{ __('Check Availability') }}
+                                        </button>
+                                    </template>
+
+                                    <!-- Available: Show Pay Now (Disabled) & Pay Now (Manual) -->
+                                    <template v-else-if="booking.status === 'available'">
+                                        <button 
+                                            disabled
+                                            class="w-full text-center px-4 py-2 bg-gray-300 text-gray-500 rounded-lg font-bold text-xs cursor-not-allowed mb-2"
+                                            :title="__('Pay with payment gateway is coming soon')"
+                                        >
+                                            {{ __('Pay with payment gateway is coming soon') }}
+                                        </button>
                                         
-                                        <a 
-                                            :href="route('booking.pay-on-arrival', booking.id)"
-                                            @click.prevent="handlePayOnArrival(booking.id)"
-                                            class="w-full text-center px-5 py-2 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-lg shadow hover:from-green-600 hover:to-green-700 font-bold text-sm transform hover:-translate-y-0.5 transition-all cursor-pointer"
-                                        >
-                                            {{ __('Pay on Arrival') }}
-                                        </a>
+                                        <div class="w-full">
+                                            <button 
+                                                @click="handlePayNowManual(booking)"
+                                                class="w-full text-center px-5 py-2.5 bg-gradient-to-r from-brand-cyan to-brand-blue text-white rounded-lg shadow hover:from-brand-blue hover:to-brand-cyan font-bold text-sm transform hover:-translate-y-0.5 transition-all"
+                                            >
+                                                {{ __('Pay Now') }}
+                                            </button>
+                                            <p class="mt-1 text-[10px] text-center text-gray-500 italic leading-tight">
+                                                {{ __('Chat with us for payment and we will provide payment method options') }}
+                                            </p>
+                                        </div>
                                     </template>
 
                                     <span v-else-if="booking.status === 'waiting_confirmation'" class="text-sm text-gray-500 flex items-center bg-gray-50 px-3 py-1 rounded-full border border-gray-200">
@@ -259,6 +352,28 @@ const handlePayOnArrival = async (bookingId) => {
                 </div>
             </div>
         </div>
+    <!-- Success Modal -->
+    <Modal :show="showSuccessModal" @close="closeModal">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center justify-center w-16 h-16 rounded-full mb-6 mx-auto bg-green-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                    </svg>
+                </div>
+                
+                <h3 class="text-2xl font-bold text-gray-900 text-center mb-2">{{ modalTitle }}</h3>
+                <p class="text-gray-600 text-center mb-8">{{ modalMessage }}</p>
+                
+                <div class="flex justify-center">
+                    <button 
+                        @click="closeModal"
+                        class="px-10 py-3 bg-brand-blue text-white font-bold rounded-xl hover:bg-brand-blue/90 transition-all font-sans"
+                    >
+                        {{ __('OK') }}
+                    </button>
+                </div>
+            </div>
+        </Modal>
     </MainLayout>
 </template>
 

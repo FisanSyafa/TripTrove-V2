@@ -19,7 +19,8 @@ class DashboardController extends Controller
             ->withQueryString(); // Agar filter/search tetap ada saat ganti halaman
 
         return Inertia::render('Dashboard', [
-            'bookings' => $bookings // Kirim Paginator Object
+            'bookings' => $bookings, // Kirim Paginator Object
+            'adminWhatsappNumber' => config('app.admin_whatsapp_number'),
         ]);
     }
 }

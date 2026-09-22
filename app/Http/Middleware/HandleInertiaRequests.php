@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
+use App\Services\CurrencyService;
+
 
 class HandleInertiaRequests extends Middleware
 {
@@ -59,18 +61,8 @@ class HandleInertiaRequests extends Middleware
             ? json_decode(File::get($jsonFile), true) 
             : [];
 
-        $rates = Cache::remember('currency_rates', 360 * 60 * 6, function () {
-            try {
-                $response = Http::get("https://api.frankfurter.app/latest?base=IDR");
-                
-                if ($response->successful()) {
-                    return $response->json()['rates'];
-                }
-                return null;
-            } catch (\Exception $e) {
-                return null;
-            }
-        });
+        $currencyService = new CurrencyService();
+        $rates = $currencyService->getRates();
 
         return [
             ...parent::share($request),
@@ -87,6 +79,10 @@ class HandleInertiaRequests extends Middleware
             'currency' => $currency, 
             'currencyRates' => $rates ?? [],
             'csrf_token' => csrf_token(),
+            'flash' => [
+                'message' => Session::get('message'),
+                'error' => Session::get('error'),
+            ],
         ];
     }
 }

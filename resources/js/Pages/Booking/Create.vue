@@ -10,7 +10,8 @@ import { countries as allCountries } from '@/Constants/countries';
 import { computed, ref, getCurrentInstance } from 'vue';
 
 const props = defineProps({
-    package: Object
+    package: Object,
+    car_prices: Object
 });
 
 // --- Helper Global ---
@@ -66,6 +67,56 @@ const participantDisplay = computed(() => {
 });
 
 const totalParticipants = computed(() => form.num_adults + form.num_children);
+
+const currentCarCharge = computed(() => {
+    if (!props.car_prices) return 0;
+    return totalParticipants.value <= 4 ? props.car_prices.small : props.car_prices.large;
+});
+
+const currentCarTypeLabel = computed(() => {
+    return totalParticipants.value <= 4 ? __('Small Car') : __('Large Car');
+});
+
+const packageTotalPriceBeforeDiscount = computed(() => {
+    return (form.num_adults * props.package.price) + (form.num_children * props.package.price * 0.5);
+});
+
+const groupTicketCalculatedItems = computed(() => {
+    if (!props.package.group_tickets || !Array.isArray(props.package.group_tickets)) {
+        return [];
+    }
+    return props.package.group_tickets.map(gt => {
+        const price = Number(gt.price) || 0;
+        const maxPersons = Number(gt.max_persons) || 0;
+        const name = gt.name || __('Group Ticket');
+        const count = (price > 0 && maxPersons > 0) ? Math.ceil(totalParticipants.value / maxPersons) : 0;
+        const total = count * price;
+        return {
+            name,
+            price,
+            max_persons: maxPersons,
+            count,
+            total
+        };
+    }).filter(item => item.total > 0);
+});
+
+const groupTicketTotal = computed(() => {
+    return groupTicketCalculatedItems.value.reduce((acc, item) => acc + item.total, 0);
+});
+
+const subtotalBeforeDiscount = computed(() => {
+    return packageTotalPriceBeforeDiscount.value + currentCarCharge.value + groupTicketTotal.value;
+});
+
+const discountAmount = computed(() => {
+    if (!props.package.discount_percent) return 0;
+    return subtotalBeforeDiscount.value * (props.package.discount_percent / 100);
+});
+
+const finalTotalPrice = computed(() => {
+    return subtotalBeforeDiscount.value - discountAmount.value;
+});
 
 const increaseAdult = () => { form.num_adults++; };
 const decreaseAdult = () => { if (form.num_adults > 1) form.num_adults--; };
@@ -159,7 +210,7 @@ const submit = () => {
                                 <span class="text-3xl text-brand-blue font-extrabold">
                                     {{ $formatCurrency(package.price * (1 - (package.discount_percent / 100))) }}
                                 </span>
-                                <span class="text-sm text-gray-500 font-medium"> / {{ __('person') }}</span>
+                                <span class="text-sm text-gray-500 font-medium"> / {{ __('pax') }}</span>
                             </div>
                         </div>
                     </div>
@@ -212,7 +263,7 @@ const submit = () => {
                                         <div class="flex items-center justify-between">
                                             <div>
                                                 <p class="font-semibold text-gray-900">{{ __('Adult') }}</p>
-                                                <p class="text-xs text-gray-500">{{ __('Age 12+') }}</p>
+                                                <p class="text-xs text-gray-500">{{ __('Age 4+') }}</p>
                                             </div>
                                             <div class="flex items-center gap-3">
                                                 <button type="button" @click="decreaseAdult" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 transition-colors" :disabled="form.num_adults <= 1">−</button>
@@ -225,7 +276,7 @@ const submit = () => {
                                         <div v-if="package.is_children_friendly" class="flex items-center justify-between border-t border-gray-100 pt-4">
                                             <div>
                                                 <p class="font-semibold text-gray-900">{{ __('Children') }}</p>
-                                                <p class="text-xs text-gray-500">{{ __('Age 2-11') }}</p>
+                                                <p class="text-xs text-gray-500">{{ __('Age 0-3') }}</p>
                                             </div>
                                             <div class="flex items-center gap-3">
                                                 <button type="button" @click="decreaseChild" class="w-8 h-8 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-30 transition-colors" :disabled="form.num_children <= 0">−</button>
@@ -375,17 +426,76 @@ const submit = () => {
                         </div>
                     </div>
 
-                    <!-- Price Summary -->
-                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-100">
-                        <div class="flex justify-between items-center">
+                    <div class="bg-gradient-to-r from-blue-50 to-cyan-50 p-6 rounded-xl border border-blue-100 space-y-4">
+                        <div class="flex justify-between items-start">
                             <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{{ __('Package Price') }}</p>
                                 <p class="text-sm text-gray-500">{{ participantDisplay }}</p>
-                                <p class="text-xs text-gray-400 mt-0.5">{{ $formatCurrency(package.price * (1 - (package.discount_percent / 100))) }} × {{ totalParticipants }} {{ __('People') }}</p>
+                                <p class="text-xs text-gray-400 mt-1">
+                                    ({{ $formatCurrency(package.price) }} × {{ form.num_adults }} {{ __('Adult') }})
+                                    <span v-if="form.num_children > 0" class="block sm:inline">
+                                        + ({{ $formatCurrency(package.price * 0.5) }} × {{ form.num_children }} {{ __('Children') }})
+                                    </span>
+                                </p>
                             </div>
                             <div class="text-right">
-                                <p class="text-sm text-gray-500">{{ __('Estimated Total') }}</p>
+                                <p class="text-sm font-bold text-gray-700">
+                                    {{ $formatCurrency(packageTotalPriceBeforeDiscount) }}
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-3 border-t border-blue-100/50">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{{ __('Transportation') }}</p>
+                                <p class="text-sm text-gray-600">{{ currentCarTypeLabel }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-gray-700">+ {{ $formatCurrency(currentCarCharge) }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Group Ticket Breakdown (Supports Multiple Group Tickets) -->
+                        <div v-for="(item, idx) in groupTicketCalculatedItems" :key="idx" class="flex justify-between items-center pt-3 border-t border-blue-100/50">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{{ item.name }}</p>
+                                <p class="text-sm text-gray-600">
+                                    {{ item.count }} {{ __('Ticket(s)') }} ({{ __('Max') }} {{ item.max_persons }} {{ __('pax/ticket') }})
+                                </p>
+                                <p class="text-xs text-gray-400">
+                                    ({{ $formatCurrency(item.price) }} / {{ __('ticket') }})
+                                </p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-gray-700">+ {{ $formatCurrency(item.total) }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Subtotal (Only show if there is a discount) -->
+                        <div v-if="package.discount_percent > 0" class="flex justify-between items-center pt-3 border-t border-blue-100/50">
+                            <div>
+                                <p class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-1">{{ __('Subtotal') }}</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-semibold text-gray-600">{{ $formatCurrency(subtotalBeforeDiscount) }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Discount (Only show if there is a discount) -->
+                        <div v-if="package.discount_percent > 0" class="flex justify-between items-center pt-3 border-t border-blue-100/50">
+                            <div>
+                                <p class="text-xs font-bold text-orange-500 uppercase tracking-wider mb-1">{{ __('Discount') }} ({{ package.discount_percent }}%)</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-sm font-bold text-orange-600">- {{ $formatCurrency(discountAmount) }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center pt-4 border-t border-blue-200">
+                            <div class="text-sm font-bold text-gray-700">{{ __('Estimated Total') }}</div>
+                            <div class="text-right">
                                 <p class="text-2xl font-extrabold text-brand-blue">
-                                    {{ $formatCurrency(package.price * (1 - (package.discount_percent / 100)) * totalParticipants) }}
+                                    {{ $formatCurrency(finalTotalPrice) }}
                                 </p>
                             </div>
                         </div>

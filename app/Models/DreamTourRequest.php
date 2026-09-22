@@ -20,10 +20,14 @@ class DreamTourRequest extends Model
         'destinations',
         'additional_info',
         'status',
+        'admin_price',
+        'price_currency',
+        'attachments',
     ];
 
     protected $casts = [
         'destinations' => 'array',
         'departure_date' => 'date',
+        'attachments' => 'array',
     ];
 }

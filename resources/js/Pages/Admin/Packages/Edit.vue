@@ -21,12 +21,23 @@ const form = useForm({
     location_details: props.package.location_details,
     description: props.package.description,
     duration_days: props.package.duration_days,
-    price: props.package.price,
+    input_currency: props.package.input_currency || 'IDR',
+    price: props.package.original_price !== null ? props.package.original_price : props.package.price,
+    small_car_price: props.package.original_small_car_price !== null ? props.package.original_small_car_price : (props.package.small_car_price || 0),
+    large_car_price: props.package.original_large_car_price !== null ? props.package.original_large_car_price : (props.package.large_car_price || 0),
+    group_tickets: Array.isArray(props.package.group_tickets) 
+        ? props.package.group_tickets.map(gt => ({
+            name: gt.name || '',
+            price: gt.original_price !== undefined && gt.original_price !== null ? gt.original_price : (gt.price || 0),
+            max_persons: gt.max_persons || 4
+          }))
+        : [],
     discount_percent: props.package.discount_percent,
     includes_hotel: props.package.includes_hotel,
     includes_guide: props.package.includes_guide,
     includes_entrance_fee: props.package.includes_entrance_fee,
     includes_driver_vehicle: props.package.includes_driver_vehicle,
+    includes_about_this_trip: props.package.includes_about_this_trip,
     cover_image: null,
     status: props.package.status,
     category: props.package.category,
@@ -56,6 +67,22 @@ const submit = () => {
             console.error("Validation Errors:", errors);
         }
     });
+};
+
+const getPreviewUrl = (file) => {
+    return URL.createObjectURL(file);
+};
+
+const addGroupTicketRow = () => {
+    form.group_tickets.push({
+        name: '',
+        price: 0,
+        max_persons: 4,
+    });
+};
+
+const removeGroupTicketRow = (index) => {
+    form.group_tickets.splice(index, 1);
 };
 </script>
 
@@ -94,21 +121,88 @@ const submit = () => {
                     field-name="description"
                 />
                 </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                <div>
+                    <InputLabel for="input_currency" value="Mata Uang Input" class="!text-brand-cyan !font-semibold" />
+                    <select id="input_currency" v-model="form.input_currency" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 rounded-md shadow-sm focus:border-brand-cyan focus:ring-brand-cyan text-white">
+                        <option value="IDR">Rupiah (IDR)</option>
+                        <option value="USD">US Dollar (USD)</option>
+                        <option value="MYR">Ringgit Malaysia (MYR)</option>
+                        <option value="SGD">Singapore Dollar (SGD)</option>
+                    </select>
+                    <InputError class="mt-2" :message="form.errors.input_currency" />
+                </div>
                 <div>
                     <InputLabel for="duration_days" value="Durasi (Hari)" class="!text-brand-cyan !font-semibold" />
                     <TextInput id="duration_days" type="number" min="1" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.duration_days" required />
                     <InputError class="mt-2" :message="form.errors.duration_days" />
                 </div>
                  <div>
-                    <InputLabel for="price" value="Harga (Rp)" class="!text-brand-cyan !font-semibold" />
-                    <TextInput id="price" type="number" min="0" step="1000" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.price" required />
+                    <InputLabel for="price" :value="`Harga (${form.input_currency})`" class="!text-brand-cyan !font-semibold" />
+                    <TextInput id="price" type="number" min="0" :step="form.input_currency === 'IDR' ? 1000 : 0.01" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.price" required />
                     <InputError class="mt-2" :message="form.errors.price" />
                 </div>
                  <div>
                     <InputLabel for="discount_percent" value="Diskon (%)" class="!text-brand-cyan !font-semibold" />
                     <TextInput id="discount_percent" type="number" min="0" max="100" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.discount_percent" />
                     <InputError class="mt-2" :message="form.errors.discount_percent" />
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <InputLabel for="small_car_price" :value="`Harga Mobil Kecil (Max 4 Penumpang) (${form.input_currency})`" class="!text-brand-cyan !font-semibold" />
+                    <TextInput id="small_car_price" type="number" min="0" :step="form.input_currency === 'IDR' ? 1000 : 0.01" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.small_car_price" required />
+                    <InputError class="mt-2" :message="form.errors.small_car_price" />
+                </div>
+                <div>
+                    <InputLabel for="large_car_price" :value="`Harga Mobil Besar (5+ Penumpang) (${form.input_currency})`" class="!text-brand-cyan !font-semibold" />
+                    <TextInput id="large_car_price" type="number" min="0" :step="form.input_currency === 'IDR' ? 1000 : 0.01" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm" v-model="form.large_car_price" required />
+                    <InputError class="mt-2" :message="form.errors.large_car_price" />
+                </div>
+            </div>
+
+            <!-- Group Ticket Pricing (Multi-Row) -->
+            <div class="p-4 bg-[#0c1222]/80 border border-gray-700/60 rounded-lg space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <h4 class="font-bold text-brand-cyan text-sm flex items-center gap-2">
+                            <span>🎫</span> Harga Tiket Grup / Rombongan (Opsional)
+                        </h4>
+                        <p class="text-xs text-gray-400 mt-1">
+                            Tambahkan baris tiket grup jika paket membutuhkan tiket rombongan (contoh: Tiket Jeep max 4 orang, Tiket Pantai Timang max 3 orang).
+                        </p>
+                    </div>
+                    <button type="button" @click="addGroupTicketRow" class="px-3 py-1.5 bg-brand-cyan/20 hover:bg-brand-cyan/30 text-brand-cyan text-xs font-bold rounded border border-brand-cyan/40 transition flex-shrink-0">
+                        + Tambah Tiket Grup
+                    </button>
+                </div>
+
+                <div v-if="form.group_tickets.length === 0" class="text-xs text-gray-500 italic p-3 bg-[#080d1a] rounded text-center">
+                    Belum ada tiket grup. Klik "+ Tambah Tiket Grup" untuk menambahkan.
+                </div>
+
+                <div v-for="(gt, index) in form.group_tickets" :key="index" class="p-3 bg-[#080d1a] border border-gray-700/40 rounded-lg space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-gray-400">Tiket Grup #{{ index + 1 }}</span>
+                        <button type="button" @click="removeGroupTicketRow(index)" class="text-red-400 hover:text-red-300 text-xs font-bold transition">
+                            ✕ Hapus
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                            <InputLabel :for="`gt_name_${index}`" value="Nama Tiket Grup" class="!text-brand-cyan !font-semibold !text-xs" />
+                            <TextInput :id="`gt_name_${index}`" type="text" placeholder="cth: Tiket Jeep Merapi" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm text-sm" v-model="gt.name" required />
+                        </div>
+                        <div>
+                            <InputLabel :for="`gt_price_${index}`" :value="`Harga (${form.input_currency})`" class="!text-brand-cyan !font-semibold !text-xs" />
+                            <TextInput :id="`gt_price_${index}`" type="number" min="0" :step="form.input_currency === 'IDR' ? 1000 : 0.01" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm text-sm" v-model="gt.price" required />
+                        </div>
+                        <div>
+                            <InputLabel :for="`gt_max_${index}`" value="Max Orang per Tiket" class="!text-brand-cyan !font-semibold !text-xs" />
+                            <TextInput :id="`gt_max_${index}`" type="number" min="1" placeholder="cth: 4" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm text-sm" v-model="gt.max_persons" required />
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -130,6 +224,10 @@ const submit = () => {
                     <Checkbox name="includes_driver_vehicle" class="rounded border-gray-500 text-brand-blue focus:ring-brand-blue" v-model:checked="form.includes_driver_vehicle" />
                     <span class="ms-2 text-sm text-gray-300">Driver & Kendaraan</span>
                 </label>
+                 <label class="flex items-center">
+                    <Checkbox name="includes_about_this_trip" class="rounded border-gray-500 text-brand-blue focus:ring-brand-blue" v-model:checked="form.includes_about_this_trip" />
+                    <span class="ms-2 text-sm text-gray-300">Sesuai di 'About This Trip' (As stated in About this trip)</span>
+                </label>
             </div>
 
             <div>
@@ -140,7 +238,7 @@ const submit = () => {
 
             <div>
                 <InputLabel for="pickup_time" value="Jam Keberangkatan (cth: 08:00)" class="!text-brand-cyan !font-semibold" />
-                <TextInput id="pickup_time" type="time" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm text-white" v-model="form.pickup_time" />
+                <input id="pickup_time" type="time" class="mt-1 block w-full bg-[#0c1222] border-gray-600/50 focus:border-brand-cyan focus:ring-brand-cyan rounded-md shadow-sm text-white focus:outline-none focus:ring-1 focus:ring-brand-cyan p-2.5" v-model="form.pickup_time" style="color-scheme: dark;" />
                 <InputError class="mt-2" :message="form.errors.pickup_time" />
             </div>
 
@@ -177,7 +275,7 @@ const submit = () => {
                 
                 <div class="mt-4">
                     <p class="text-sm text-gray-400">Preview Gambar:</p>
-                    <img v-if="form.cover_image && typeof form.cover_image === 'object'" :src="URL.createObjectURL(form.cover_image)" class="mt-2 h-32 object-cover rounded shadow">
+                    <img v-if="form.cover_image && typeof form.cover_image === 'object'" :src="getPreviewUrl(form.cover_image)" class="mt-2 h-32 object-cover rounded shadow">
                     <img v-else-if="package.cover_image_url" :src="`/storage/${package.cover_image_url}`" class="mt-2 h-32 object-cover rounded shadow">
                     <p v-else class="mt-2 text-sm text-gray-500">Tidak ada gambar.</p>
                 </div>
@@ -200,7 +298,7 @@ const submit = () => {
                         <input 
                             id="gallery_image"
                             type="file" 
-                            @input="galleryForm.images = $event.target.files"  
+                            @input="galleryForm.images = Array.from($event.target.files)"  
                             class="block w-full text-sm text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-brand-cyan file:text-brand-dark hover:file:bg-brand-cyan/20 cursor-pointer"
                             required
                             multiple 
